@@ -1,0 +1,31 @@
+<tr id="captured_request_<%= captured_request.id %>" class="hover:bg-slate-50">
+  <td class="px-4 py-2.5">
+    <span class="text-xs font-mono font-bold px-1.5 py-0.5 rounded
+      <%= captured_request.http_method == 'GET' ? 'bg-blue-100 text-blue-700' :
+          captured_request.http_method == 'POST' ? 'bg-green-100 text-green-700' :
+          captured_request.http_method == 'DELETE' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700' %>">
+      <%= captured_request.http_method %>
+    </span>
+  </td>
+  <td class="px-4 py-2.5 font-mono text-xs text-slate-700 max-w-[200px] truncate">
+    <%= captured_request.path %>
+  </td>
+  <td class="px-4 py-2.5 text-xs font-semibold
+    <%= captured_request.response_status < 400 ? 'text-green-600' : 'text-red-500' %>">
+    <%= captured_request.response_status %>
+  </td>
+  <td class="px-4 py-2.5 text-center">
+    <%= captured_request.matched_mock ? "✅" : "<span class='text-slate-300'>—</span>".html_safe %>
+  </td>
+  <td class="px-4 py-2.5 text-xs text-slate-400">
+    <%= "#{captured_request.duration_ms}ms" if captured_request.duration_ms %>
+  </td>
+  <td class="px-4 py-2.5 text-xs text-slate-400">
+    <%= time_ago_in_words(captured_request.created_at) %> ago
+  </td>
+  <td class="px-4 py-2.5">
+    <%= link_to "View",
+      http_bin_captured_request_path(captured_request.http_bin_id, captured_request),
+      class: "text-xs text-indigo-500 hover:underline" %>
+  </td>
+</tr>

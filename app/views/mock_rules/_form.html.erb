@@ -1,0 +1,86 @@
+<% content_for :title, "#{action_name == 'new' ? 'New Mock Rule' : "Edit: #{@rule.name}"} – Marco Polo" %>
+
+<div class="mb-6">
+  <h1 class="text-2xl font-bold text-slate-900"><%= action_name == 'new' ? 'New Mock Rule' : "Edit Rule" %></h1>
+  <p class="text-slate-500 mt-1">Bin: <%= link_to @bin.name, http_bin_path(@bin), class: "text-indigo-600 hover:underline" %></p>
+</div>
+
+<div class="max-w-2xl">
+  <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+    <%= form_with model: [@bin, @rule], class: "space-y-5" do |f| %>
+      <% if @rule.errors.any? %>
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-700">
+          <ul class="list-disc list-inside">
+            <% @rule.errors.full_messages.each do |msg| %>
+              <li><%= msg %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div>
+        <%= f.label :name, class: "block text-sm font-medium text-slate-700 mb-1" %>
+        <%= f.text_field :name, class: "w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent", placeholder: "e.g. Mock users endpoint" %>
+      </div>
+
+      <div>
+        <%= f.label :description, class: "block text-sm font-medium text-slate-700 mb-1" %>
+        <%= f.text_area :description, rows: 2, class: "w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent" %>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <%= f.label :http_method, "HTTP Method", class: "block text-sm font-medium text-slate-700 mb-1" %>
+          <%= f.select :http_method, MockRule::HTTP_METHODS, {}, class: "w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" %>
+        </div>
+        <div>
+          <%= f.label :path_pattern, "Path Pattern", class: "block text-sm font-medium text-slate-700 mb-1" %>
+          <%= f.text_field :path_pattern, class: "w-full border border-slate-300 rounded-lg px-3 py-2 text-sm font-mono", placeholder: "/api/users/*" %>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <%= f.check_box :use_regex, class: "rounded" %>
+        <%= f.label :use_regex, "Treat path pattern as regex", class: "text-sm text-slate-700" %>
+      </div>
+
+      <div class="grid grid-cols-3 gap-4">
+        <div>
+          <%= f.label :response_status, "Status Code", class: "block text-sm font-medium text-slate-700 mb-1" %>
+          <%= f.number_field :response_status, class: "w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" %>
+        </div>
+        <div>
+          <%= f.label :content_type, "Content-Type", class: "block text-sm font-medium text-slate-700 mb-1" %>
+          <%= f.text_field :content_type, class: "w-full border border-slate-300 rounded-lg px-3 py-2 text-sm font-mono", placeholder: "application/json" %>
+        </div>
+        <div>
+          <%= f.label :delay_ms, "Delay (ms)", class: "block text-sm font-medium text-slate-700 mb-1" %>
+          <%= f.number_field :delay_ms, class: "w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" %>
+        </div>
+      </div>
+
+      <div>
+        <%= f.label :response_body, class: "block text-sm font-medium text-slate-700 mb-1" %>
+        <%= f.text_area :response_body, rows: 8, class: "w-full border border-slate-300 rounded-lg px-3 py-2 text-sm font-mono", placeholder: '{"message": "hello"}' %>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <%= f.label :priority, class: "block text-sm font-medium text-slate-700 mb-1" %>
+          <%= f.number_field :priority, class: "w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" %>
+          <p class="text-xs text-slate-400 mt-1">Higher number = matched first</p>
+        </div>
+        <div class="flex items-center gap-2 mt-6">
+          <%= f.check_box :enabled, class: "rounded" %>
+          <%= f.label :enabled, "Rule active", class: "text-sm text-slate-700" %>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3 pt-2">
+        <%= f.submit action_name == 'new' ? 'Create Rule' : 'Update Rule',
+              class: "bg-indigo-600 text-white px-5 py-2 rounded-lg text-sm hover:bg-indigo-700 cursor-pointer" %>
+        <%= link_to "Cancel", http_bin_path(@bin), class: "text-sm text-slate-500 hover:text-slate-700" %>
+      </div>
+    <% end %>
+  </div>
+</div>

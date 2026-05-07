@@ -1,0 +1,61 @@
+<% content_for :title, "Request #{@captured_request.request_id.truncate(8, omission: '…')} – Marco Polo" %>
+
+<div class="mb-6 flex items-center gap-4">
+  <%= link_to "← Back to #{@bin.name}", http_bin_path(@bin), class: "text-sm text-slate-400 hover:text-slate-600" %>
+</div>
+
+<div class="grid lg:grid-cols-2 gap-6">
+  <!-- Request details -->
+  <div class="bg-white rounded-xl border border-slate-200 shadow-sm">
+    <div class="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+      <span class="text-xs font-mono font-bold px-2 py-1 rounded bg-blue-100 text-blue-700">
+        <%= @captured_request.http_method %>
+      </span>
+      <code class="text-sm text-slate-700 font-mono"><%= @captured_request.path %></code>
+    </div>
+    <dl class="divide-y divide-slate-100">
+      <% {
+        "Request ID"   => @captured_request.request_id,
+        "Remote IP"    => @captured_request.remote_ip,
+        "Content-Type" => @captured_request.content_type,
+        "Duration"     => "#{@captured_request.duration_ms}ms",
+        "Captured At"  => @captured_request.created_at.strftime("%Y-%m-%d %H:%M:%S UTC"),
+        "Matched Mock" => (@captured_request.matched_mock ? "✅ Yes" : "No"),
+      }.each do |label, value| %>
+        <div class="px-6 py-3 flex gap-4">
+          <dt class="text-xs text-slate-400 uppercase tracking-wide w-32 flex-shrink-0 pt-0.5"><%= label %></dt>
+          <dd class="text-sm text-slate-800 font-mono"><%= value %></dd>
+        </div>
+      <% end %>
+    </dl>
+  </div>
+
+  <!-- Query params & Response -->
+  <div class="space-y-4">
+    <% unless @captured_request.query_params.blank? %>
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+        <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Query Params</h3>
+        <pre class="text-xs text-slate-700 bg-slate-50 rounded p-3 overflow-auto max-h-40"><%= JSON.pretty_generate(@captured_request.query_params) %></pre>
+      </div>
+    <% end %>
+
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+      <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">
+        Response <span class="text-slate-400 font-normal">(<%= @captured_request.response_status %>)</span>
+      </h3>
+      <pre class="text-xs text-slate-700 bg-slate-50 rounded p-3 overflow-auto max-h-48"><%= @captured_request.response_body.presence || "(no body)" %></pre>
+    </div>
+  </div>
+</div>
+
+<!-- Headers & Body -->
+<div class="grid lg:grid-cols-2 gap-6 mt-6">
+  <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+    <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Request Headers</h3>
+    <pre class="text-xs text-slate-700 bg-slate-50 rounded p-3 overflow-auto max-h-64"><%= JSON.pretty_generate(@captured_request.headers) %></pre>
+  </div>
+  <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+    <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Request Body</h3>
+    <pre class="text-xs text-slate-700 bg-slate-50 rounded p-3 overflow-auto max-h-64"><%= @captured_request.body.presence || "(empty)" %></pre>
+  </div>
+</div>

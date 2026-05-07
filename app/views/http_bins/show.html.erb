@@ -1,0 +1,113 @@
+<% content_for :title, "#{@bin.name} – Marco Polo" %>
+
+<div class="mb-6 flex items-start justify-between">
+  <div>
+    <h1 class="text-2xl font-bold text-slate-900"><%= @bin.name %></h1>
+    <p class="text-slate-500 text-sm mt-1"><%= @bin.description %></p>
+    <div class="mt-2 flex items-center gap-2">
+      <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Ingest URL:</span>
+      <code class="text-sm bg-slate-100 px-3 py-1 rounded font-mono text-indigo-700">
+        <%= request.base_url %>/b/<%= @bin.token %>
+      </code>
+      <span class="text-xs text-slate-400">(any method, any path)</span>
+    </div>
+  </div>
+  <div class="flex gap-2">
+    <%= link_to "Edit", edit_http_bin_path(@bin), class: "text-sm border border-slate-300 px-3 py-1.5 rounded-lg hover:bg-slate-50" %>
+    <%= link_to "+ Add Rule", new_http_bin_mock_rule_path(@bin), class: "text-sm bg-indigo-600 text-white px-3 py-1.5 rounded-lg hover:bg-indigo-700" %>
+    <%= link_to "← Bins", http_bins_path, class: "text-sm text-slate-400 hover:text-slate-600" %>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="grid grid-cols-3 gap-4 mb-6">
+  <div class="bg-white rounded-xl border border-slate-200 p-4 text-center">
+    <div class="text-2xl font-bold text-slate-900"><%= @stats[:total] %></div>
+    <div class="text-xs text-slate-500 mt-1">Total Requests</div>
+  </div>
+  <div class="bg-white rounded-xl border border-slate-200 p-4 text-center">
+    <div class="text-2xl font-bold text-green-600"><%= @stats[:matched] %></div>
+    <div class="text-xs text-slate-500 mt-1">Matched Mock</div>
+  </div>
+  <div class="bg-white rounded-xl border border-slate-200 p-4 text-center">
+    <div class="text-2xl font-bold text-orange-500"><%= @stats[:unmatched] %></div>
+    <div class="text-xs text-slate-500 mt-1">Unmatched</div>
+  </div>
+</div>
+
+<div class="grid lg:grid-cols-3 gap-6">
+  <!-- Captured Requests (2/3 width) -->
+  <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm">
+    <div class="px-6 py-4 border-b border-slate-100">
+      <h2 class="font-semibold text-slate-800">Captured Requests</h2>
+    </div>
+    <div id="captured_requests">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="bg-slate-50 text-xs text-slate-500 uppercase tracking-wide">
+            <th class="px-4 py-3 text-left">Method</th>
+            <th class="px-4 py-3 text-left">Path</th>
+            <th class="px-4 py-3 text-left">Status</th>
+            <th class="px-4 py-3 text-left">Matched</th>
+            <th class="px-4 py-3 text-left">Duration</th>
+            <th class="px-4 py-3 text-left">Time</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <% @requests.each do |req| %>
+            <%= render "captured_requests/row", captured_request: req %>
+          <% end %>
+          <% if @requests.empty? %>
+            <tr>
+              <td colspan="7" class="text-center py-12 text-slate-400">
+                No requests yet.<br>
+                <code class="text-xs mt-1 block">curl <%= request.base_url %>/b/<%= @bin.token %>/anything</code>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+    <%== pagy_nav(@pagy) if @pagy.pages > 1 %>
+  </div>
+
+  <!-- Mock Rules (1/3 width) -->
+  <div class="bg-white rounded-xl border border-slate-200 shadow-sm">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+      <h2 class="font-semibold text-slate-800">Mock Rules</h2>
+      <%= link_to "+ Add", new_http_bin_mock_rule_path(@bin), class: "text-xs text-indigo-600 hover:underline" %>
+    </div>
+    <ul class="divide-y divide-slate-100">
+      <% @rules.each do |rule| %>
+        <li class="px-4 py-3">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-xs font-mono font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">
+              <%= rule.http_method %>
+            </span>
+            <span class="text-xs text-slate-700 flex-1 truncate"><%= rule.path_pattern %></span>
+            <span class="text-xs font-semibold <%= rule.response_status < 400 ? 'text-green-600' : 'text-red-500' %>">
+              <%= rule.response_status %>
+            </span>
+          </div>
+          <div class="text-xs text-slate-500 mt-1 flex items-center justify-between">
+            <span><%= rule.name %> <%= rule.enabled ? "✅" : "⛔" %></span>
+            <div class="flex gap-2">
+              <%= link_to "Edit", edit_http_bin_mock_rule_path(@bin, rule), class: "text-indigo-500 hover:underline" %>
+              <%= button_to "Delete", http_bin_mock_rule_path(@bin, rule), method: :delete,
+                    data: { turbo_confirm: "Delete this rule?" },
+                    class: "text-red-400 hover:text-red-600" %>
+            </div>
+          </div>
+        </li>
+      <% end %>
+      <% if @rules.empty? %>
+        <li class="px-4 py-8 text-center text-slate-400 text-xs">
+          No rules yet.
+        </li>
+      <% end %>
+    </ul>
+  </div>
+</div>
+
+<%= turbo_stream_from "bin_#{@bin.token}" %>

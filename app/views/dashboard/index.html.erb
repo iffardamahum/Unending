@@ -1,0 +1,77 @@
+<% content_for :title, "Dashboard – Marco Polo" %>
+
+<div class="mb-8">
+  <h1 class="text-2xl font-bold text-slate-900">Dashboard</h1>
+  <p class="text-slate-500 mt-1">Welcome back, <strong><%= current_user.email %></strong></p>
+</div>
+
+<!-- Stats -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+  <% [
+    ["HTTP Bins",    @stats[:total_bins],     "🗂️",  "indigo"],
+    ["Requests",    @stats[:total_requests], "📡",  "blue"],
+    ["Matched",     @stats[:matched],        "✅",  "green"],
+    ["Mock Rules",  @stats[:total_rules],    "🎯",  "purple"]
+  ].each do |label, value, icon, color| %>
+    <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+      <div class="text-2xl mb-1"><%= icon %></div>
+      <div class="text-3xl font-bold text-slate-900"><%= value %></div>
+      <div class="text-sm text-slate-500 mt-1"><%= label %></div>
+    </div>
+  <% end %>
+</div>
+
+<!-- Bins + Recent requests -->
+<div class="grid md:grid-cols-2 gap-6">
+  <!-- Bins -->
+  <div class="bg-white rounded-xl border border-slate-200 shadow-sm">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+      <h2 class="font-semibold text-slate-800">Your Bins</h2>
+      <%= link_to "+ New Bin", new_http_bin_path, class: "text-sm text-indigo-600 hover:underline" %>
+    </div>
+    <ul class="divide-y divide-slate-100">
+      <% @bins.each do |bin| %>
+        <li class="px-6 py-3 flex items-center justify-between hover:bg-slate-50">
+          <div>
+            <%= link_to bin.name, http_bin_path(bin), class: "font-medium text-slate-800 hover:text-indigo-600" %>
+            <div class="text-xs text-slate-400 font-mono mt-0.5">/b/<%= bin.token %></div>
+          </div>
+          <span class="text-xs text-slate-400"><%= bin.captured_requests.count %> reqs</span>
+        </li>
+      <% end %>
+      <% if @bins.empty? %>
+        <li class="px-6 py-8 text-center text-slate-400 text-sm">
+          No bins yet. <%= link_to "Create one →", new_http_bin_path, class: "text-indigo-500 hover:underline" %>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+
+  <!-- Recent Requests -->
+  <div class="bg-white rounded-xl border border-slate-200 shadow-sm">
+    <div class="px-6 py-4 border-b border-slate-100">
+      <h2 class="font-semibold text-slate-800">Recent Requests</h2>
+    </div>
+    <ul class="divide-y divide-slate-100">
+      <% @recent_requests.each do |req| %>
+        <li class="px-6 py-3 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-mono font-bold px-1.5 py-0.5 rounded <%= req.http_method == 'GET' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700' %>">
+              <%= req.http_method %>
+            </span>
+            <span class="text-sm text-slate-700 truncate max-w-[160px]"><%= req.path %></span>
+          </div>
+          <div class="flex items-center gap-2 text-xs text-slate-400">
+            <span class="<%= req.response_status < 400 ? 'text-green-600' : 'text-red-500' %> font-semibold">
+              <%= req.response_status %>
+            </span>
+            <span><%= req.matched_mock ? "✅" : "—" %></span>
+          </div>
+        </li>
+      <% end %>
+      <% if @recent_requests.empty? %>
+        <li class="px-6 py-8 text-center text-slate-400 text-sm">No requests yet.</li>
+      <% end %>
+    </ul>
+  </div>
+</div>
