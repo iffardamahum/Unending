@@ -13,6 +13,7 @@ ActiveAdmin.register HttpBin do
       bin.captured_requests.count
     end
     column :created_at
+    column :expires_at
     actions
   end
 
@@ -25,6 +26,7 @@ ActiveAdmin.register HttpBin do
       row :user
       row :ingest_url
       row :created_at
+      row :expires_at
     end
 
     panel "Captured Requests (last 10)" do
@@ -35,6 +37,7 @@ ActiveAdmin.register HttpBin do
         column :response_status
         column :matched_mock
         column :created_at
+        column :expires_at
       end
     end
 
@@ -46,6 +49,8 @@ ActiveAdmin.register HttpBin do
         column :response_status
         column :enabled
         column :priority
+        column :created_at
+        column :expires_at
       end
     end
   end

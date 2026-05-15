@@ -43,15 +43,25 @@ class IngestController < ActionController::Base
 
   def find_bin
     @bin = HttpBin.find_by!(token: params[:token])
+    if @bin.expires_at.present? && @bin.expires_at < Time.current
+      render json: { error: "Bin has expired" }, status: :gone
+    end
   rescue ActiveRecord::RecordNotFound
     render json: { error: "Bin not found" }, status: :not_found
   end
+  
 
   def find_matching_rule
+    puts "--------------------starting rule matching--------------------"
+     puts "debug: #{request.method} path: #{params[:path]}"
+  @bin.mock_rules.active.ordered.each do |rule|
+    puts "debug: rule available - metod: #{rule.http_method} path_pattern: #{rule.path_pattern}"
+    puts"---------------------finished rule matching--------------------"
+  end
     @bin.mock_rules
         .active
         .ordered
-        .find { |rule| rule.matches?(request.method, request.path) }
+        .find { |rule| rule.matches?(request.method, params[:path]) }
   end
 
   def extract_headers

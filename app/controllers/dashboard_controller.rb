@@ -1,6 +1,6 @@
 class DashboardController < ApplicationController
   def index
-    @bins = current_user.http_bins.order(created_at: :desc)
+    @bins = current_user.http_bins.order(created_at: :desc, expires_at: :asc)
     @recent_requests = CapturedRequest
                          .joins(:http_bin)
                          .where(http_bins: { user_id: current_user.id })

@@ -6,8 +6,9 @@ class HttpBinsController < ApplicationController
   end
 
   def show
+    @http_bin = HttpBin.find(params[:id])
     @pagy, @requests = pagy(
-      @bin.captured_requests.recent,
+      @http_bin.captured_requests.order(created_at: :desc),
       items: 25
     )
     @rules = @bin.mock_rules.ordered
