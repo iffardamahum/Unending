@@ -24,7 +24,7 @@ gem "tailwindcss-rails"
 gem "jbuilder"
 
 # Authentication
-gem "devise", "~> 4.9"
+gem "devise", "~> 5.0.4"
 gem "bcrypt", "~> 3.1.7"
 gem "omniauth"
 gem "omniauth-rails_csrf_protection"
