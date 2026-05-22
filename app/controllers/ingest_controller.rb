@@ -4,6 +4,7 @@ class IngestController < ActionController::Base
   protect_from_forgery with: :null_session
 
   before_action :find_bin
+  before_action :check_rate_limit
 
   def capture
     start_time = Process.clock_gettime(Process::CLOCK_MONOTONIC)
@@ -49,24 +50,40 @@ class IngestController < ActionController::Base
   rescue ActiveRecord::RecordNotFound
     render json: { error: "Bin not found" }, status: :not_found
   end
-  
+
+  def check_rate_limit
+    key = "rate_limit:#{@bin.token}"
+    count = REDIS.incr(key)
+    REDIS.expire(key, 60) if count == 1 # 60 = 1 minute expiration for the key
+
+    if count > 5  # count how many times you want to allow per minute
+    render json: { error: "Rate limit exceeded. Try again in a minute" },
+           status: :too_many_requests
+    end
+  end
 
   def find_matching_rule
-    puts "--------------------starting rule matching--------------------"
-     puts "debug: #{request.method} path: #{params[:path]}"
-  @bin.mock_rules.active.ordered.each do |rule|
-    puts "debug: rule available - metod: #{rule.http_method} path_pattern: #{rule.path_pattern}"
-    puts"---------------------finished rule matching--------------------"
-  end
     @bin.mock_rules
         .active
         .ordered
         .find { |rule| rule.matches?(request.method, params[:path]) }
   end
 
+
+  SENSITIVE_HEADERS = %w[authorization cookie set-cookie x-api-key x-auth-token].freeze
+
   def extract_headers
-    request.headers.env.select { |k, _| k.start_with?("HTTP_") }
-                        .transform_keys { |k| k.sub("HTTP_", "").split("_").map(&:capitalize).join("-") }
+   request.headers.env
+    .select { |k, _| k.start_with?("HTTP_") || k.in?(%w[CONTENT_TYPE CONTENT_LENGTH]) }
+    .each_with_object({}) do |(key, value), hash|
+      clean_key = key.sub(/^HTTP_/, "").split("_").map(&:capitalize).join("-")
+      hash[clean_key] = SENSITIVE_HEADERS.include?(clean_key.downcase) ? mask_header(value) : value
+    end
+  end
+
+  def mask_header(value)
+    return value if value.nil?
+    "[MASKED]"
   end
 
   def read_body

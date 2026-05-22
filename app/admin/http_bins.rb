@@ -1,7 +1,7 @@
 ActiveAdmin.register HttpBin do
   menu label: "HTTP Bins"
 
-  permit_params :name, :description, :user_id
+  permit_params :name, :description, :user_id, :expires_at
 
   index do
     selectable_column
@@ -16,18 +16,28 @@ ActiveAdmin.register HttpBin do
     column :expires_at
     actions
   end
+  # Edit form
+  form do |f|
+   f.inputs do
+     f.input :name
+     f.input :description
+     f.input :user_id
+     f.input :expires_at
+   end
+   f.actions
+  end
 
   show do
     attributes_table do
-      row :id
-      row :name
-      row :token
-      row :description
-      row :user
-      row :ingest_url
-      row :created_at
-      row :expires_at
-    end
+     row :id
+     row :name
+     row :token
+     row :user_id
+     row :request_count
+     row :expires_at
+     row :created_at
+      row :updated_at
+  end
 
     panel "Captured Requests (last 10)" do
       table_for resource.captured_requests.recent.limit(10) do

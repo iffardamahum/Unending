@@ -18,16 +18,16 @@ class MockRule < ApplicationRecord
     return false unless self.http_method.upcase == method.upcase
     clean_db_path = self.path_pattern.to_s.gsub(%r{\A/|/\z}, "")
     clean_req_path = path.to_s.gsub(%r{\A/|/\z}, "")
-    
+
     clean_db_path == clean_req_path
   end
 
   def self.ransackable_associations(auth_object = nil)
-    ["http_bin"]
+    [ "http_bin" ]
   end
 
   def self.ransackable_attributes(auth_object = nil)
-    ["content_type", "created_at", "delay_ms", "description", "enabled", "http_bin_id", "http_method", "id", "id_value", "name", "path_pattern", "priority", "response_body", "response_headers", "response_status", "updated_at", "use_regex"]
+    [ "content_type", "created_at", "delay_ms", "description", "enabled", "http_bin_id", "http_method", "id", "id_value", "name", "path_pattern", "priority", "response_body", "response_headers", "response_status", "updated_at", "use_regex" ]
   end
 
   private

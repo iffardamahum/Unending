@@ -20,8 +20,8 @@ class CreateCapturedRequests < ActiveRecord::Migration[8.1]
     end
 
     add_index :captured_requests, :request_id, unique: true
-    add_index :captured_requests, [:http_bin_id, :created_at]
-    add_index :captured_requests, [:http_bin_id, :http_method]
+    add_index :captured_requests, [ :http_bin_id, :created_at ]
+    add_index :captured_requests, [ :http_bin_id, :http_method ]
     add_index :captured_requests, :matched_mock
   end
 end

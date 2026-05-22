@@ -4,12 +4,13 @@ ActiveAdmin.setup do |config|
   # Set the title that is displayed on the main layout
   # for each of the active admin pages.
   #
+  config.use_webpacker = false
   config.site_title = "Marcopolo"
 
   # Set the link url for the title. For example, to take
-  # users to your main site. Defaults to no link.
+  # users to your main site. Defaulraits to no link.
   #
-  # config.site_title_link = "/"
+  config.site_title_link = :root
 
   # Set an optional image to be displayed for the header
   # instead of a string (overrides :site_title)
@@ -174,7 +175,7 @@ ActiveAdmin.setup do |config|
   # You can exclude possibly sensitive model attributes from being displayed,
   # added to forms, or exported by default by ActiveAdmin
   #
-  config.filter_attributes = [:encrypted_password, :password, :password_confirmation]
+  config.filter_attributes = [ :encrypted_password, :password, :password_confirmation ]
 
   # == Localize Date/Time Format
   #

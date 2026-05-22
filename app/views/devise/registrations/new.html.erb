@@ -1,0 +1,51 @@
+<% content_for :title, "Sign up — Marco Polo" %>
+
+<div class="min-h-[80vh] flex items-center justify-center">
+  <div class="w-[360px] text-center">
+
+    <div class="w-14 h-14 mx-auto mb-5 rounded-2xl border border-slate-200 bg-slate-50 flex items-center justify-center text-3xl">
+      🧭
+    </div>
+
+    <h1 class="text-2xl font-semibold text-slate-900 mb-1">Create account</h1>
+    <p class="text-sm text-slate-500 mb-8">to Marco Polo</p>
+
+    <%= form_for resource, as: resource_name, url: registration_path(resource_name) do |f| %>
+      <% if resource.errors.any? %>
+        <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600 text-left">
+          <% resource.errors.full_messages.each do |msg| %>
+            <p><%= msg %></p>
+          <% end %>
+        </div>
+      <% end %>
+
+      <div class="border border-slate-200 rounded-2xl overflow-hidden bg-white mb-4">
+        <div class="px-4 py-3 border-b border-slate-200">
+          <%= f.email_field :email,
+                autofocus: true,
+                placeholder: "Email",
+                class: "w-full text-sm text-slate-700 outline-none bg-transparent placeholder-slate-400" %>
+        </div>
+        <div class="px-4 py-3 border-b border-slate-200">
+          <%= f.password_field :password,
+                placeholder: "Password",
+                class: "w-full text-sm text-slate-700 outline-none bg-transparent placeholder-slate-400" %>
+        </div>
+        <div class="px-4 py-3 border-b border-slate-200">
+          <%= f.password_field :password_confirmation,
+                placeholder: "Confirm password",
+                class: "w-full text-sm text-slate-700 outline-none bg-transparent placeholder-slate-400" %>
+        </div>
+        <%= f.submit "Create account",
+              class: "w-full px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer bg-transparent" %>
+      </div>
+    <% end %>
+
+    <p class="text-sm text-slate-500">
+      Already have an account?
+      <%= link_to "Sign in", new_session_path(resource_name), class: "text-indigo-600 hover:underline" %>
+    </p>
+
+    <p class="text-xs text-slate-400 mt-6">Internal platform · Marcopolo v1.0</p>
+  </div>
+</div>

@@ -1,77 +1,210 @@
 <% content_for :title, "Dashboard – Marco Polo" %>
 
-<div class="mb-8">
-  <h1 class="text-2xl font-bold text-slate-900">Dashboard</h1>
-  <p class="text-slate-500 mt-1">Welcome back, <strong><%= current_user.email %></strong></p>
+<%
+  expiring_soon = @bins.select { |b|
+    b.expires_at.present? && b.expires_at > Time.current && b.expires_at < 24.hours.from_now
+  }.count
+
+  today_requests = @recent_requests.select { |r|
+    r.created_at >= Time.current.beginning_of_day
+  }.count rescue @stats[:total_requests]
+
+  avg_ms = begin
+    all = @bins.flat_map { |b| b.captured_requests.pluck(:duration_ms).compact }
+    all.any? ? (all.sum / all.size.to_f).round : 0
+  rescue
+    0
+  end
+%>
+<%
+ # today and yesterday trend calculation
+  if @stats[:yesterday] == 0
+    trend      = "No data yesterday"
+    trend_color = "#94a3b8"
+  else
+    diff = @stats[:today] - @stats[:yesterday]
+    pct  = ((diff.to_f / @stats[:yesterday]) * 100).round
+    if diff > 0
+      trend       = "↑ #{pct}% from yesterday"
+      trend_color = "#10b981"
+    elsif diff < 0
+      trend       = "↓ #{pct.abs}% from yesterday"
+      trend_color = "#ef4444"
+    else
+      trend       = "Same as yesterday"
+      trend_color = "#94a3b8"
+    end
+  end
+%>
+
+
+<%# ── Page header ── %>
+<div class="flex items-start justify-between mb-8">
+  <div>
+    <h1 class="text-2xl font-bold text-slate-900 flex items-center gap-2">
+      🧭 Mock Endpoints
+    </h1>
+    <p class="text-slate-500 text-sm mt-1">Capture, inspect, and mock HTTP requests</p>
+  </div>
+  <%= link_to "+ Create Endpoint", new_http_bin_path,
+        class: "bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition shadow-sm" %>
 </div>
 
-<!-- Stats -->
+<%# ── Stat cards ── %>
 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-  <% [
-    ["HTTP Bins",    @stats[:total_bins],     "🗂️",  "indigo"],
-    ["Requests",    @stats[:total_requests], "📡",  "blue"],
-    ["Matched",     @stats[:matched],        "✅",  "green"],
-    ["Mock Rules",  @stats[:total_rules],    "🎯",  "purple"]
-  ].each do |label, value, icon, color| %>
-    <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
-      <div class="text-2xl mb-1"><%= icon %></div>
-      <div class="text-3xl font-bold text-slate-900"><%= value %></div>
-      <div class="text-sm text-slate-500 mt-1"><%= label %></div>
+  <%
+    cards = [
+      {
+        label:      "Active Endpoints",
+        value:      @bins.count { |b| b.expires_at.nil? || b.expires_at > Time.current },
+        sub:        "+#{@bins.count { |b| b.created_at >= 7.days.ago }} this week",
+        sub_color:  "#6366f1",
+        border:     "#6366f1"
+      },
+      {
+        label:      "Today's Requests",
+        value:      @stats[:today],
+        sub:        trend,
+        sub_color:  trend_color,
+        border:     "#22c55e"
+      },
+      {
+        label:      "Avg Response Time",
+        value:      "#{avg_ms}ms",
+        sub:        "Mock overhead",
+        sub_color:  "#94a3b8",
+        border:     "#a855f7"
+      },
+      {
+        label:      "Expiring Soon",
+        value:      expiring_soon,
+        sub:        "Within 24 hours",
+        sub_color:  "#f97316",
+        border:     "#f97316"
+      }
+    ]
+  %>
+  <% cards.each do |card| %>
+    <div class="bg-white rounded-xl border border-slate-200 border-l-4 p-5 shadow-sm"
+         style="border-left-color: <%= card[:border] %>">
+      <div class="text-xs text-slate-500 mb-2"><%= card[:label] %></div>
+      <div class="text-3xl font-bold text-slate-900 mb-1"><%= card[:value] %></div>
+      <div class="text-xs" style="color: <%= card[:sub_color] %>"><%= card[:sub] %></div>
     </div>
   <% end %>
 </div>
 
-<!-- Bins + Recent requests -->
-<div class="grid md:grid-cols-2 gap-6">
-  <!-- Bins -->
-  <div class="bg-white rounded-xl border border-slate-200 shadow-sm">
-    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-      <h2 class="font-semibold text-slate-800">Your Bins</h2>
-      <%= link_to "+ New Bin", new_http_bin_path, class: "text-sm text-indigo-600 hover:underline" %>
-    </div>
-    <ul class="divide-y divide-slate-100">
-      <% @bins.each do |bin| %>
-        <li class="px-6 py-3 flex items-center justify-between hover:bg-slate-50">
-          <div>
-            <%= link_to bin.name, http_bin_path(bin), class: "font-medium text-slate-800 hover:text-indigo-600" %>
-            <div class="text-xs text-slate-400 font-mono mt-0.5">/b/<%= bin.token %></div>
-          </div>
-          <span class="text-xs text-slate-400"><%= bin.captured_requests.count %> reqs</span>
-        </li>
-      <% end %>
-      <% if @bins.empty? %>
-        <li class="px-6 py-8 text-center text-slate-400 text-sm">
-          No bins yet. <%= link_to "Create one →", new_http_bin_path, class: "text-indigo-500 hover:underline" %>
-        </li>
-      <% end %>
-    </ul>
+<%# ── Endpoints table ── %>
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm">
+  <div class="px-6 py-4 border-b border-slate-100">
+    <h2 class="font-semibold text-slate-800">Your Endpoints</h2>
   </div>
 
-  <!-- Recent Requests -->
-  <div class="bg-white rounded-xl border border-slate-200 shadow-sm">
-    <div class="px-6 py-4 border-b border-slate-100">
-      <h2 class="font-semibold text-slate-800">Recent Requests</h2>
-    </div>
-    <ul class="divide-y divide-slate-100">
-      <% @recent_requests.each do |req| %>
-        <li class="px-6 py-3 flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <span class="text-xs font-mono font-bold px-1.5 py-0.5 rounded <%= req.http_method == 'GET' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700' %>">
-              <%= req.http_method %>
+  <table class="w-full text-sm">
+    <thead>
+      <tr class="text-xs text-slate-400 uppercase tracking-wide border-b border-slate-100">
+        <th class="px-6 py-3 text-left font-medium">Name</th>
+        <th class="px-6 py-3 text-left font-medium">Token</th>
+        <th class="px-6 py-3 text-left font-medium">Owner</th>
+        <th class="px-6 py-3 text-left font-medium">Requests</th>
+        <th class="px-6 py-3 text-left font-medium">Status</th>
+        <th class="px-6 py-3 text-left font-medium">Expires</th>
+        <th class="px-6 py-3 text-left font-medium">Actions</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100">
+      <% @bins.each do |bin| %>
+        <%
+          is_expired  = bin.expires_at.present? && bin.expires_at < Time.current
+          is_expiring = !is_expired && bin.expires_at.present? && bin.expires_at < 24.hours.from_now
+
+          if is_expired
+            status_dot   = "bg-red-400"
+            status_text  = "Expired"
+            status_class = "text-red-500"
+          else
+            status_dot   = "bg-green-400"
+            status_text  = "Active"
+            status_class = "text-green-600"
+          end
+
+          if is_expired
+            expires_label = "expired"
+            expires_class = "text-red-400"
+          elsif bin.expires_at.nil?
+            expires_label = "never"
+            expires_class = "text-slate-400"
+          else
+            hours_left = ((bin.expires_at - Time.current) / 3600).round
+            if hours_left < 1
+              expires_label = "< 1h"
+              expires_class = "text-red-500 font-semibold"
+            elsif hours_left < 24
+              expires_label = "in #{hours_left}h"
+              expires_class = "text-orange-500 font-semibold"
+            else
+              days_left = (hours_left / 24.0).round
+              expires_label = "in #{days_left} day#{"s" if days_left != 1}"
+              expires_class = "text-slate-500"
+            end
+          end
+
+          req_count = bin.captured_requests.count
+        %>
+        <tr class="hover:bg-slate-50 transition-colors">
+          <td class="px-6 py-3.5">
+            <%= link_to http_bin_path(bin), class: "font-semibold text-slate-800 hover:text-indigo-600 flex items-center gap-1.5" do %>
+              <span class="text-base">🗂️</span>
+              <%= bin.name %>
+            <% end %>
+          </td>
+          <td class="px-6 py-3.5">
+            <code class="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded font-mono">
+              <%= bin.token.truncate(16, omission: "…") %>
+            </code>
+          </td>
+          <td class="px-6 py-3.5 text-slate-500 text-xs">
+            <%= bin.user.email %>
+          </td>
+          <td class="px-6 py-3.5">
+            <span class="inline-flex items-center justify-center min-w-[2.5rem] px-2 py-0.5 rounded-full text-xs font-semibold
+              <%= req_count > 0 ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-400' %>">
+              <%= req_count %>
             </span>
-            <span class="text-sm text-slate-700 truncate max-w-[160px]"><%= req.path %></span>
-          </div>
-          <div class="flex items-center gap-2 text-xs text-slate-400">
-            <span class="<%= req.response_status < 400 ? 'text-green-600' : 'text-red-500' %> font-semibold">
-              <%= req.response_status %>
+          </td>
+          <td class="px-6 py-3.5">
+            <span class="flex items-center gap-1.5 text-xs font-medium <%= status_class %>">
+              <span class="w-1.5 h-1.5 rounded-full <%= status_dot %> inline-block"></span>
+              <%= status_text %>
             </span>
-            <span><%= req.matched_mock ? "✅" : "—" %></span>
-          </div>
-        </li>
+          </td>
+          <td class="px-6 py-3.5 text-xs <%= expires_class %>">
+            <%= expires_label %>
+          </td>
+          <td class="px-6 py-3.5">
+            <div class="flex items-center gap-3">
+              <%= link_to "View", http_bin_path(bin),
+                    class: "text-xs text-indigo-600 hover:text-indigo-800 font-medium" %>
+              <%= link_to "Edit", edit_http_bin_path(bin),
+                    class: "text-xs text-slate-500 hover:text-slate-700 font-medium" %>
+              <% if is_expired %>
+                <%= button_to "Delete", http_bin_path(bin), method: :delete,
+                      data: { turbo_confirm: "Delete this bin?" },
+                      class: "text-xs text-red-400 hover:text-red-600 font-medium bg-transparent border-0 p-0 cursor-pointer" %>
+              <% end %>
+            </div>
+          </td>
+        </tr>
       <% end %>
-      <% if @recent_requests.empty? %>
-        <li class="px-6 py-8 text-center text-slate-400 text-sm">No requests yet.</li>
+
+      <% if @bins.empty? %>
+        <tr>
+          <td colspan="7" class="px-6 py-16 text-center text-slate-400 text-sm">
+            No endpoints yet.
+            <%= link_to "Create your first one →", new_http_bin_path, class: "text-indigo-500 hover:underline ml-1" %>
+          </td>
+        </tr>
       <% end %>
-    </ul>
-  </div>
+    </tbody>
+  </table>
 </div>

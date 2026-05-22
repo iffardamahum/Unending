@@ -1,113 +1,356 @@
 <% content_for :title, "#{@bin.name} – Marco Polo" %>
 
-<div class="mb-6 flex items-start justify-between">
+<%# ── Breadcrumb ── %>
+<div class="mb-4 text-sm text-slate-400">
+  <%= link_to "Dashboard", dashboard_path, class: "hover:text-slate-600" %>
+  <span class="mx-1.5">／</span>
+  <span class="text-slate-700 font-medium"><%= @bin.name %></span>
+</div>
+
+<%# ── Header ── %>
+<div class="mb-6 flex items-start justify-between gap-4">
   <div>
-    <h1 class="text-2xl font-bold text-slate-900"><%= @bin.name %></h1>
-    <p class="text-slate-500 text-sm mt-1"><%= @bin.description %></p>
-    <div class="mt-2 flex items-center gap-2">
-      <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Ingest URL:</span>
-      <code class="text-sm bg-slate-100 px-3 py-1 rounded font-mono text-indigo-700">
-        <%= request.base_url %>/b/<%= @bin.token %>
-      </code>
-      <span class="text-xs text-slate-400">(any method, any path)</span>
+    <div class="flex items-center gap-3">
+      <h1 class="text-2xl font-bold text-slate-900">🗂️ <%= @bin.name %></h1>
+      <% if @bin.expires_at.present? && @bin.expires_at < Time.current %>
+        <span class="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-400 font-medium">Expired</span>
+      <% else %>
+        <span class="text-xs px-2 py-0.5 rounded-full bg-green-50 text-green-600 font-medium">Active</span>
+      <% end %>
     </div>
+    <p class="text-slate-500 text-sm mt-1"><%= @bin.description.presence || "No description." %></p>
   </div>
-  <div class="flex gap-2">
-    <%= link_to "Edit", edit_http_bin_path(@bin), class: "text-sm border border-slate-300 px-3 py-1.5 rounded-lg hover:bg-slate-50" %>
-    <%= link_to "+ Add Rule", new_http_bin_mock_rule_path(@bin), class: "text-sm bg-indigo-600 text-white px-3 py-1.5 rounded-lg hover:bg-indigo-700" %>
-    <%= link_to "← Bins", http_bins_path, class: "text-sm text-slate-400 hover:text-slate-600" %>
-  </div>
-</div>
-
-<!-- Stats -->
-<div class="grid grid-cols-3 gap-4 mb-6">
-  <div class="bg-white rounded-xl border border-slate-200 p-4 text-center">
-    <div class="text-2xl font-bold text-slate-900"><%= @stats[:total] %></div>
-    <div class="text-xs text-slate-500 mt-1">Total Requests</div>
-  </div>
-  <div class="bg-white rounded-xl border border-slate-200 p-4 text-center">
-    <div class="text-2xl font-bold text-green-600"><%= @stats[:matched] %></div>
-    <div class="text-xs text-slate-500 mt-1">Matched Mock</div>
-  </div>
-  <div class="bg-white rounded-xl border border-slate-200 p-4 text-center">
-    <div class="text-2xl font-bold text-orange-500"><%= @stats[:unmatched] %></div>
-    <div class="text-xs text-slate-500 mt-1">Unmatched</div>
+  <div class="flex gap-2 shrink-0">
+    <%= link_to "✏️ Edit", edit_http_bin_path(@bin),
+          class: "text-sm border border-slate-300 px-3 py-1.5 rounded-lg hover:bg-slate-50 text-slate-600" %>
+    <%= button_to "🗑️ Delete", http_bin_path(@bin), method: :delete,
+          data: { turbo_confirm: "Delete this bin and all its requests?" },
+          class: "text-sm border border-red-200 text-red-500 px-3 py-1.5 rounded-lg hover:bg-red-50" %>
   </div>
 </div>
 
+<%# ── Endpoint URL card ── %>
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-6">
+  <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">Endpoint URL</div>
+  <div class="flex items-center gap-2 bg-slate-900 text-green-400 font-mono text-sm px-4 py-3 rounded-lg mb-3 overflow-x-auto">
+    <span id="endpoint-url"><%= request.base_url %>/b/<%= @bin.token %></span>
+  </div>
+  <div class="flex gap-2 flex-wrap">
+    <button onclick="copyEndpointUrl()"
+            class="flex items-center gap-1.5 text-xs bg-indigo-600 text-white px-3 py-1.5 rounded-lg hover:bg-indigo-700 transition">
+      📋 Copy URL
+    </button>
+    <button onclick="copyCurl()"
+            class="flex items-center gap-1.5 text-xs bg-slate-700 text-white px-3 py-1.5 rounded-lg hover:bg-slate-800 transition">
+      📄 Copy cURL
+    </button>
+    <a href="<%= request.base_url %>/b/<%= @bin.token %>" target="_blank"
+       class="flex items-center gap-1.5 text-xs border border-slate-300 text-slate-600 px-3 py-1.5 rounded-lg hover:bg-slate-50 transition">
+      🌐 Test in Browser
+    </a>
+    <%= link_to "✏️ Edit in Admin", admin_http_bin_path(@bin),
+          class: "flex items-center gap-1.5 text-xs border border-slate-300 text-slate-500 px-3 py-1.5 rounded-lg hover:bg-slate-50 transition" %>
+  </div>
+</div>
+
+<%# ── Main 2-column layout ── %>
 <div class="grid lg:grid-cols-3 gap-6">
-  <!-- Captured Requests (2/3 width) -->
-  <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm">
-    <div class="px-6 py-4 border-b border-slate-100">
-      <h2 class="font-semibold text-slate-800">Captured Requests</h2>
-    </div>
-    <div id="captured_requests">
-      <table class="w-full text-sm">
-        <thead>
-          <tr class="bg-slate-50 text-xs text-slate-500 uppercase tracking-wide">
-            <th class="px-4 py-3 text-left">Method</th>
-            <th class="px-4 py-3 text-left">Path</th>
-            <th class="px-4 py-3 text-left">Status</th>
-            <th class="px-4 py-3 text-left">Matched</th>
-            <th class="px-4 py-3 text-left">Duration</th>
-            <th class="px-4 py-3 text-left">Time</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-100">
-          <% @requests.each do |req| %>
-            <%= render "captured_requests/row", captured_request: req %>
-          <% end %>
-          <% if @requests.empty? %>
-            <tr>
-              <td colspan="7" class="text-center py-12 text-slate-400">
-                No requests yet.<br>
-                <code class="text-xs mt-1 block">curl <%= request.base_url %>/b/<%= @bin.token %>/anything</code>
-              </td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-    </div>
-    <%== pagy_nav(@pagy) if @pagy.pages > 1 %>
-  </div>
 
-  <!-- Mock Rules (1/3 width) -->
-  <div class="bg-white rounded-xl border border-slate-200 shadow-sm">
-    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-      <h2 class="font-semibold text-slate-800">Mock Rules</h2>
-      <%= link_to "+ Add", new_http_bin_mock_rule_path(@bin), class: "text-xs text-indigo-600 hover:underline" %>
-    </div>
-    <ul class="divide-y divide-slate-100">
-      <% @rules.each do |rule| %>
-        <li class="px-4 py-3">
-          <div class="flex items-center justify-between gap-2">
-            <span class="text-xs font-mono font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">
-              <%= rule.http_method %>
-            </span>
-            <span class="text-xs text-slate-700 flex-1 truncate"><%= rule.path_pattern %></span>
-            <span class="text-xs font-semibold <%= rule.response_status < 400 ? 'text-green-600' : 'text-red-500' %>">
-              <%= rule.response_status %>
-            </span>
+  <%# ── Left: Captured Requests (2/3) ── %>
+  <div class="lg:col-span-2 space-y-6">
+
+    <%# Mock Response Config ── %>
+    <% if @rules.any? %>
+      <% primary = @rules.first %>
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="font-semibold text-slate-800">Mock Response Configuration</h2>
+          <%= link_to "✏️ Edit in Admin", edit_admin_http_bin_path(@bin),
+                class: "text-xs text-indigo-500 hover:underline" %>
+        </div>
+        <div class="mb-3">
+          <div class="text-xs text-slate-400 mb-1">HTTP Status</div>
+          <span class="inline-block text-sm font-bold px-2.5 py-1 rounded
+            <%= primary.response_status < 300 ? 'bg-green-100 text-green-700' :
+                primary.response_status < 400 ? 'bg-yellow-100 text-yellow-700' :
+                'bg-red-100 text-red-700' %>">
+            <%= primary.response_status %>
+          </span>
+        </div>
+        <% if primary.response_body.present? %>
+          <div class="mb-3">
+            <div class="text-xs text-slate-400 mb-1">Response Body</div>
+            <pre class="text-xs bg-slate-900 text-green-300 rounded-lg p-4 overflow-auto max-h-48 font-mono"><%= begin; JSON.pretty_generate(JSON.parse(primary.response_body)); rescue; primary.response_body; end %></pre>
           </div>
-          <div class="text-xs text-slate-500 mt-1 flex items-center justify-between">
-            <span><%= rule.name %> <%= rule.enabled ? "✅" : "⛔" %></span>
-            <div class="flex gap-2">
-              <%= link_to "Edit", edit_http_bin_mock_rule_path(@bin, rule), class: "text-indigo-500 hover:underline" %>
-              <%= button_to "Delete", http_bin_mock_rule_path(@bin, rule), method: :delete,
-                    data: { turbo_confirm: "Delete this rule?" },
-                    class: "text-red-400 hover:text-red-600" %>
+        <% end %>
+        <% if primary.response_headers.present? %>
+          <div>
+            <div class="text-xs text-slate-400 mb-1">Response Headers</div>
+            <div class="text-xs font-mono space-y-0.5 bg-slate-50 rounded-lg p-3">
+              <% primary.response_headers.each do |k, v| %>
+                <div><span class="text-indigo-500"><%= k %></span><span class="text-slate-400">: </span><span class="text-slate-600"><%= v %></span></div>
+              <% end %>
             </div>
           </div>
-        </li>
+        <% end %>
+      </div>
+    <% end %>
+
+    <%# Captured Requests table ── %>
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+        <h2 class="font-semibold text-slate-800">Recent Requests</h2>
+        <button onclick="location.reload()"
+                class="text-xs text-slate-400 hover:text-slate-600 flex items-center gap-1">
+          🔄 Refresh
+        </button>
+      </div>
+      <div id="captured_requests">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-slate-50 text-xs text-slate-500 uppercase tracking-wide">
+              <th class="px-4 py-3 text-left">Method</th>
+              <th class="px-4 py-3 text-left">Path</th>
+              <th class="px-4 py-3 text-left">Status</th>
+              <th class="px-4 py-3 text-left">Matched</th>
+              <th class="px-4 py-3 text-left">Duration</th>
+              <th class="px-4 py-3 text-left">Time</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <% @requests.each do |req| %>
+              <%= render "captured_requests/row", captured_request: req %>
+            <% end %>
+            <% if @requests.empty? %>
+              <tr>
+                <td colspan="7" class="text-center py-12 text-slate-400">
+                  No requests yet.<br>
+                  <code class="text-xs mt-2 block text-slate-500">curl <%= request.base_url %>/b/<%= @bin.token %>/anything</code>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+      <%== pagy_nav(@pagy) if @pagy.pages > 1 %>
+    </div>
+  </div>
+
+  <%# ── Right: Sidebar (1/3) ── %>
+  <div class="space-y-4">
+
+    <%# Endpoint Info ── %>
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+      <h3 class="font-semibold text-slate-800 mb-3">Endpoint Info</h3>
+      <dl class="space-y-2 text-sm">
+        <div>
+          <dt class="text-xs text-slate-400">Owner</dt>
+          <dd class="text-slate-700"><%= @bin.user.email %></dd>
+        </div>
+        <div>
+          <dt class="text-xs text-slate-400">Created</dt>
+          <dd class="text-slate-700"><%= @bin.created_at.strftime("%b %d, %H:%M") %></dd>
+        </div>
+        <div>
+          <dt class="text-xs text-slate-400">Expires</dt>
+          <% if @bin.expires_at.present? %>
+            <% expired = @bin.expires_at < Time.current %>
+            <dd class="<%= expired ? 'text-red-500' : 'text-orange-500' %> font-medium">
+              <%= @bin.expires_at.strftime("%b %d, %H:%M") %>
+              <%= " (expired)" if expired %>
+            </dd>
+          <% else %>
+            <dd class="text-slate-400">Never</dd>
+          <% end %>
+        </div>
+        <div>
+          <dt class="text-xs text-slate-400">Total Requests</dt>
+          <dd class="text-2xl font-bold text-slate-900"><%= @stats[:total] %></dd>
+        </div>
+      </dl>
+    </div>
+
+    <%# Quick Stats ── %>
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+      <h3 class="font-semibold text-slate-800 mb-3">Quick Stats</h3>
+      <dl class="space-y-2 text-sm">
+        <div class="flex justify-between">
+          <dt class="text-slate-500">Today</dt>
+          <dd class="font-semibold text-slate-800"><%= @bin.captured_requests.where("created_at >= ?", Time.current.beginning_of_day).count %></dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-slate-500">Last 7 days</dt>
+          <dd class="font-semibold text-slate-800"><%= @stats[:total] %></dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-slate-500">Avg Response</dt>
+          <dd class="font-semibold text-slate-800">
+            <% avg = @bin.captured_requests.average(:duration_ms)&.round %>
+            <%= avg ? "#{avg}ms" : "—" %>
+          </dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-slate-500">Error Rate</dt>
+          <% total = @stats[:total].to_f %>
+          <% errors = @bin.captured_requests.where("response_status >= 400").count %>
+          <dd class="font-semibold <%= errors > 0 ? 'text-red-500' : 'text-green-600' %>">
+            <%= total > 0 ? "#{((errors / total) * 100).round(1)}%" : "0%" %>
+          </dd>
+        </div>
+      </dl>
+    </div>
+
+   <%# Quick Actions ── %>
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+  <h3 class="font-semibold text-slate-800 mb-3">Quick Actions</h3>
+  <div class="space-y-2">
+    <button onclick="copyEndpointUrl()"
+            class="w-full text-sm bg-indigo-600 text-white px-3 py-2 rounded-lg hover:bg-indigo-700 transition text-center">
+      📋 Copy Endpoint
+    </button>
+    <%= link_to "+ Add Mock Rule", new_http_bin_mock_rule_path(@bin),
+          class: "block w-full text-sm bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition text-center" %>
+
+    <% if @rules.any? %>
+      <% if @rules.length == 1 %>
+        <%# Kalau cuma 1 rule, langsung buka aja %>
+        <a href="<%= request.base_url %>/b/<%= @bin.token %>/<%= @rules.first.path_pattern.to_s.gsub(/\A\//, '') %>"
+           target="_blank"
+           class="block w-full text-sm bg-slate-700 text-white px-3 py-2 rounded-lg hover:bg-slate-800 transition text-center">
+          ✅ Test Now — <%= @rules.first.path_pattern %>
+        </a>
+      <% else %>
+        <%# Kalau lebih dari 1 rule, kasih dropdown %>
+        <div class="relative">
+          <select id="test-rule-select"
+                  class="w-full text-sm border border-slate-300 px-3 py-2 rounded-lg text-slate-600 bg-white appearance-none pr-8">
+            <option value="">— Pick a rule to test —</option>
+            <% @rules.each do |rule| %>
+              <option value="<%= request.base_url %>/b/<%= @bin.token %>/<%= rule.path_pattern.to_s.gsub(/\A\//, '') %>">
+                [<%= rule.http_method %>] <%= rule.path_pattern %> → <%= rule.response_status %>
+              </option>
+            <% end %>
+          </select>
+          <div class="pointer-events-none absolute inset-y-0 right-2 flex items-center text-slate-400">▾</div>
+        </div>
+        <button onclick="testSelectedRule()"
+                class="w-full text-sm bg-slate-700 text-white px-3 py-2 rounded-lg hover:bg-slate-800 transition text-center">
+          ✅ Test Selected Rule
+        </button>
       <% end %>
-      <% if @rules.empty? %>
-        <li class="px-4 py-8 text-center text-slate-400 text-xs">
-          No rules yet.
-        </li>
-      <% end %>
-    </ul>
+    <% else %>
+      <button disabled
+              class="w-full text-sm bg-slate-100 text-slate-400 px-3 py-2 rounded-lg cursor-not-allowed text-center">
+        ✅ Test Now (add a rule first)
+      </button>
+    <% end %>
+  </div>
+</div>
+
+
+    <%# Mock Rules ── %>
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm">
+  <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+    <h3 class="font-semibold text-slate-800">Mock Rules</h3>
+    <%= link_to "+ Add", new_http_bin_mock_rule_path(@bin),
+          class: "text-xs text-indigo-600 hover:underline" %>
+  </div>
+  <ul class="divide-y divide-slate-100">
+    <% @rules.each do |rule| %>
+      <%
+        method_styles = {
+          "GET"    => "bg-blue-100 text-blue-700",
+          "POST"   => "bg-green-100 text-green-700",
+          "PUT"    => "bg-yellow-100 text-yellow-700",
+          "PATCH"  => "bg-purple-100 text-purple-700",
+          "DELETE" => "bg-red-100 text-red-700",
+          "ANY"    => "bg-slate-100 text-slate-600"
+        }
+        method_class = method_styles[rule.http_method] || "bg-slate-100 text-slate-600"
+        status_class = rule.response_status < 300 ? "text-green-600" :
+                       rule.response_status < 400 ? "text-yellow-500" : "text-red-500"
+      %>
+      <li class="px-4 py-3">
+        <%# Row 1: method + path + status %>
+        <div class="flex items-center gap-2 mb-2">
+          <span class="text-xs font-mono font-bold px-1.5 py-0.5 rounded shrink-0 <%= method_class %>">
+            <%= rule.http_method %>
+          </span>
+          <span class="text-xs text-slate-700 flex-1 truncate font-mono" title="<%= rule.path_pattern %>">
+            <%= rule.path_pattern %>
+          </span>
+          <span class="text-xs font-semibold shrink-0 <%= status_class %>">
+            <%= rule.response_status %>
+          </span>
+          <%# enabled/disabled dot %>
+          <span class="w-1.5 h-1.5 rounded-full shrink-0 <%= rule.enabled ? 'bg-green-400' : 'bg-slate-300' %>"></span>
+        </div>
+        <%# Row 2: name + actions %>
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-slate-400 truncate"><%= rule.name %></span>
+          <div class="flex items-center gap-1 shrink-0 ml-2">
+            <%= link_to "Edit",
+                  edit_http_bin_mock_rule_path(@bin, rule),
+                  class: "text-xs px-2 py-0.5 rounded border border-slate-200 text-slate-500 hover:border-indigo-300 hover:text-indigo-600 transition" %>
+            <%= button_to "Delete",
+                  http_bin_mock_rule_path(@bin, rule),
+                  method: :delete,
+                  data: { turbo_confirm: "Delete \"#{rule.name}\"?" },
+                  class: "text-xs px-2 py-0.5 rounded border border-slate-200 text-slate-400 hover:border-red-300 hover:text-red-500 transition bg-transparent" %>
+          </div>
+        </div>
+      </li>
+    <% end %>
+    <% if @rules.empty? %>
+      <li class="px-4 py-8 text-center text-slate-400 text-xs">
+        No rules yet.
+        <%= link_to "+ Add one", new_http_bin_mock_rule_path(@bin), class: "text-indigo-500 hover:underline" %>
+      </li>
+    <% end %>
+  </ul>
+</div>
+
+    <%# Pro Tip ── %>
+    <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs text-amber-700">
+      <div class="font-semibold mb-1">💡 Pro Tip</div>
+      Click on any request to see full details (headers, body, response).
+    </div>
+
   </div>
 </div>
 
 <%= turbo_stream_from "bin_#{@bin.token}" %>
+
+<script>
+  function copyEndpointUrl() {
+    const url = document.getElementById("endpoint-url").textContent.trim();
+    navigator.clipboard.writeText(url).then(() => showToast("URL copied!"));
+  }
+
+  function copyCurl() {
+    const url = document.getElementById("endpoint-url").textContent.trim();
+    const curl = `curl -X POST "${url}/your-path" \\\n  -H "Content-Type: application/json" \\\n  -d '{"key": "value"}'`;
+    navigator.clipboard.writeText(curl).then(() => showToast("cURL copied!"));
+  }
+
+  function showToast(msg) {
+    const t = document.createElement("div");
+    t.textContent = msg;
+    t.className = "fixed bottom-6 right-6 bg-slate-900 text-white text-sm px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity";
+    document.body.appendChild(t);
+    setTimeout(() => { t.style.opacity = "0"; setTimeout(() => t.remove(), 300); }, 2000);
+  }
+
+  function testSelectedRule() {
+  const select = document.getElementById("test-rule-select");
+  const url = select.value;
+  if (!url) {
+    showToast("Pick a rule first!");
+    return;
+  }
+  window.open(url, "_blank");
+}
+
+</script>
+

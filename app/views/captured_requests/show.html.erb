@@ -1,61 +1,239 @@
-<% content_for :title, "Request #{@captured_request.request_id.truncate(8, omission: '…')} – Marco Polo" %>
+<% content_for :title, "Request ##{@captured_request.id} – Marco Polo" %>
 
-<div class="mb-6 flex items-center gap-4">
-  <%= link_to "← Back to #{@bin.name}", http_bin_path(@bin), class: "text-sm text-slate-400 hover:text-slate-600" %>
+<%# ── Breadcrumb ── %>
+<div class="mb-4 text-sm text-slate-400">
+  <%= link_to "Dashboard", dashboard_path, class: "hover:text-slate-600" %>
+  <span class="mx-1.5">／</span>
+  <%= link_to @bin.name, http_bin_path(@bin), class: "hover:text-slate-600" %>
+  <span class="mx-1.5">／</span>
+  <span class="text-slate-700 font-medium">Request #<%= @captured_request.id %></span>
 </div>
 
-<div class="grid lg:grid-cols-2 gap-6">
-  <!-- Request details -->
-  <div class="bg-white rounded-xl border border-slate-200 shadow-sm">
-    <div class="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
-      <span class="text-xs font-mono font-bold px-2 py-1 rounded bg-blue-100 text-blue-700">
-        <%= @captured_request.http_method %>
-      </span>
-      <code class="text-sm text-slate-700 font-mono"><%= @captured_request.path %></code>
-    </div>
-    <dl class="divide-y divide-slate-100">
-      <% {
-        "Request ID"   => @captured_request.request_id,
-        "Remote IP"    => @captured_request.remote_ip,
-        "Content-Type" => @captured_request.content_type,
-        "Duration"     => "#{@captured_request.duration_ms}ms",
-        "Captured At"  => @captured_request.created_at.strftime("%Y-%m-%d %H:%M:%S UTC"),
-        "Matched Mock" => (@captured_request.matched_mock ? "✅ Yes" : "No"),
-      }.each do |label, value| %>
-        <div class="px-6 py-3 flex gap-4">
-          <dt class="text-xs text-slate-400 uppercase tracking-wide w-32 flex-shrink-0 pt-0.5"><%= label %></dt>
-          <dd class="text-sm text-slate-800 font-mono"><%= value %></dd>
-        </div>
-      <% end %>
-    </dl>
-  </div>
+<%# ── Header bar ── %>
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm px-6 py-4 mb-6 flex items-center justify-between gap-4 flex-wrap">
+  <div class="flex items-center gap-3">
+    <%
+      method_styles = {
+        "GET"    => "bg-blue-100 text-blue-700",
+        "POST"   => "bg-green-100 text-green-700",
+        "PUT"    => "bg-yellow-100 text-yellow-700",
+        "PATCH"  => "bg-purple-100 text-purple-700",
+        "DELETE" => "bg-red-100 text-red-700"
+      }
+      method_class = method_styles[@captured_request.http_method] || "bg-slate-100 text-slate-600"
 
-  <!-- Query params & Response -->
-  <div class="space-y-4">
-    <% unless @captured_request.query_params.blank? %>
-      <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
-        <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Query Params</h3>
-        <pre class="text-xs text-slate-700 bg-slate-50 rounded p-3 overflow-auto max-h-40"><%= JSON.pretty_generate(@captured_request.query_params) %></pre>
+      status_class = if @captured_request.response_status < 300
+        "bg-green-100 text-green-700"
+      elsif @captured_request.response_status < 400
+        "bg-yellow-100 text-yellow-700"
+      else
+        "bg-red-100 text-red-700"
+      end
+    %>
+    <span class="text-sm font-mono font-bold px-2.5 py-1 rounded <%= method_class %>">
+      <%= @captured_request.http_method %>
+    </span>
+    <span class="text-sm font-mono font-bold px-2.5 py-1 rounded <%= status_class %>">
+      <%= @captured_request.response_status %>
+    </span>
+    <span class="text-xs text-slate-400"><%= @captured_request.duration_ms %>ms</span>
+    <span class="text-slate-200">|</span>
+    <span class="text-sm text-slate-600 font-mono"><%= @captured_request.path %></span>
+  </div>
+  <div class="flex items-center gap-3 text-xs text-slate-400">
+    <span>Timestamp: <%= @captured_request.created_at.strftime("%Y-%m-%d %H:%M:%S UTC") %></span>
+    <span class="text-slate-200">|</span>
+    <span>IP: <span class="font-mono text-slate-600"><%= @captured_request.remote_ip %></span></span>
+    <span class="text-slate-200">|</span>
+    <span>Source: <span class="font-semibold <%= @captured_request.matched_mock ? 'text-indigo-600' : 'text-slate-500' %>">
+      <%= @captured_request.matched_mock ? "Mock" : "Pass-through" %>
+    </span></span>
+    <button onclick="location.href='<%= http_bin_path(@bin) %>'"
+            class="ml-2 text-slate-400 hover:text-slate-600 text-lg leading-none">×</button>
+  </div>
+</div>
+
+<%# ── Side-by-side Request / Response ── %>
+<div class="grid lg:grid-cols-2 gap-6 mb-6">
+
+  <%# Request panel ── %>
+  <div class="bg-white rounded-xl border border-slate-200 shadow-sm">
+    <div class="px-6 py-4 border-b border-slate-100 flex items-center gap-2">
+      <span class="text-blue-500 font-bold">↙</span>
+      <h2 class="font-semibold text-slate-800">Request</h2>
+    </div>
+
+    <%# URL ── %>
+    <div class="px-6 py-4 border-b border-slate-100">
+      <div class="text-xs text-slate-400 uppercase tracking-wide mb-1.5">URL</div>
+      <code class="text-sm bg-slate-900 text-green-400 px-3 py-1.5 rounded font-mono block truncate">
+        <%= @captured_request.path %>
+      </code>
+    </div>
+
+    <%# Query Params ── %>
+    <% if @captured_request.query_params.present? %>
+      <div class="px-6 py-4 border-b border-slate-100">
+        <div class="text-xs text-slate-400 uppercase tracking-wide mb-2">Query Parameters</div>
+        <div class="space-y-1">
+          <% @captured_request.query_params.each do |k, v| %>
+            <div class="text-xs font-mono">
+              <span class="text-indigo-500"><%= k %></span>
+              <span class="text-slate-400"> = </span>
+              <span class="text-orange-500"><%= v %></span>
+            </div>
+          <% end %>
+        </div>
       </div>
     <% end %>
 
-    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
-      <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">
-        Response <span class="text-slate-400 font-normal">(<%= @captured_request.response_status %>)</span>
-      </h3>
-      <pre class="text-xs text-slate-700 bg-slate-50 rounded p-3 overflow-auto max-h-48"><%= @captured_request.response_body.presence || "(no body)" %></pre>
+    <%# Request Headers ── %>
+    <div class="px-6 py-4 border-b border-slate-100">
+      <div class="text-xs text-slate-400 uppercase tracking-wide mb-2">Request Headers</div>
+      <div class="space-y-1 max-h-40 overflow-auto">
+        <% (@captured_request.headers || {}).each do |k, v| %>
+          <div class="text-xs font-mono">
+            <span class="text-indigo-500"><%= k %></span>
+            <span class="text-slate-400">: </span>
+            <span class="<%= v == '[MASKED]' ? 'text-red-400 italic' : 'text-slate-600' %>"><%= v %></span>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <%# Request Body ── %>
+    <div class="px-6 py-4">
+      <div class="text-xs text-slate-400 uppercase tracking-wide mb-2">Request Body</div>
+      <% if @captured_request.body.present? %>
+        <pre class="text-xs bg-slate-900 text-green-300 rounded-lg p-4 overflow-auto max-h-48 font-mono"><%= begin; JSON.pretty_generate(JSON.parse(@captured_request.body)); rescue; @captured_request.body; end %></pre>
+      <% else %>
+        <span class="text-xs text-slate-400 italic">(empty)</span>
+      <% end %>
+    </div>
+  </div>
+
+  <%# Response panel ── %>
+  <div class="bg-white rounded-xl border border-slate-200 shadow-sm">
+    <div class="px-6 py-4 border-b border-slate-100 flex items-center gap-2">
+      <span class="text-green-500 font-bold">↗</span>
+      <h2 class="font-semibold text-slate-800">Response</h2>
+    </div>
+
+    <%# Status & Metadata ── %>
+    <div class="px-6 py-4 border-b border-slate-100">
+      <div class="text-xs text-slate-400 uppercase tracking-wide mb-2">Status & Metadata</div>
+      <div class="space-y-1.5 text-sm">
+        <div class="flex justify-between">
+          <span class="text-slate-500">Status Code</span>
+          <span class="font-bold <%= @captured_request.response_status < 400 ? 'text-green-600' : 'text-red-500' %>">
+            <%= @captured_request.response_status %>
+            <%= @captured_request.response_status < 300 ? "OK" : @captured_request.response_status < 400 ? "Redirect" : "Error" %>
+          </span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">Response Time</span>
+          <span class="font-semibold text-slate-800"><%= @captured_request.duration_ms %>ms</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">Source</span>
+          <span class="font-semibold <%= @captured_request.matched_mock ? 'text-indigo-600' : 'text-slate-500' %>">
+            <%= @captured_request.matched_mock ? "Mock" : "Pass-through" %>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <%# Response Headers ── %>
+    <% if @captured_request.response_headers.present? %>
+      <div class="px-6 py-4 border-b border-slate-100">
+        <div class="text-xs text-slate-400 uppercase tracking-wide mb-2">Response Headers</div>
+        <div class="space-y-1 max-h-32 overflow-auto">
+          <% @captured_request.response_headers.each do |k, v| %>
+            <div class="text-xs font-mono">
+              <span class="text-indigo-500"><%= k %></span>
+              <span class="text-slate-400">: </span>
+              <span class="text-slate-600"><%= v %></span>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <%# Response Body ── %>
+    <div class="px-6 py-4">
+      <div class="text-xs text-slate-400 uppercase tracking-wide mb-2">Response Body</div>
+      <% if @captured_request.response_body.present? %>
+        <pre class="text-xs bg-slate-900 text-green-300 rounded-lg p-4 overflow-auto max-h-48 font-mono"><%= begin; JSON.pretty_generate(JSON.parse(@captured_request.response_body)); rescue; @captured_request.response_body; end %></pre>
+      <% else %>
+        <span class="text-xs text-slate-400 italic">(no body)</span>
+      <% end %>
     </div>
   </div>
 </div>
 
-<!-- Headers & Body -->
-<div class="grid lg:grid-cols-2 gap-6 mt-6">
-  <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
-    <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Request Headers</h3>
-    <pre class="text-xs text-slate-700 bg-slate-50 rounded p-3 overflow-auto max-h-64"><%= JSON.pretty_generate(@captured_request.headers) %></pre>
-  </div>
-  <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
-    <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Request Body</h3>
-    <pre class="text-xs text-slate-700 bg-slate-50 rounded p-3 overflow-auto max-h-64"><%= @captured_request.body.presence || "(empty)" %></pre>
+<%# ── Actions ── %>
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm px-6 py-4">
+  <div class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Actions</div>
+  <div class="flex gap-3 flex-wrap">
+    <button onclick="copyRequest()"
+            class="flex items-center gap-1.5 text-sm bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">
+      📋 Copy Request
+    </button>
+    <button onclick="copyResponse()"
+            class="flex items-center gap-1.5 text-sm bg-slate-700 text-white px-4 py-2 rounded-lg hover:bg-slate-800 transition">
+      📋 Copy Response
+    </button>
+    <button onclick="copyCurl()"
+            class="flex items-center gap-1.5 text-sm bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+      🔄 Export as cURL
+    </button>
+    <%= link_to "← Back to Bin", http_bin_path(@bin),
+          class: "flex items-center gap-1.5 text-sm border border-slate-300 text-slate-600 px-4 py-2 rounded-lg hover:bg-slate-50 transition" %>
   </div>
 </div>
+
+<script>
+  const requestData = <%= raw @captured_request.to_json %>;
+
+  function copyRequest() {
+    const payload = {
+      method: requestData.http_method,
+      path: requestData.path,
+      headers: requestData.headers,
+      query_params: requestData.query_params,
+      body: requestData.body
+    };
+    navigator.clipboard.writeText(JSON.stringify(payload, null, 2))
+      .then(() => showToast("Request copied!"));
+  }
+
+  function copyResponse() {
+    const payload = {
+      status: requestData.response_status,
+      headers: requestData.response_headers,
+      body: requestData.response_body
+    };
+    navigator.clipboard.writeText(JSON.stringify(payload, null, 2))
+      .then(() => showToast("Response copied!"));
+  }
+
+  function copyCurl() {
+    const baseUrl = "<%= request.base_url %>";
+    const headers = Object.entries(requestData.headers || {})
+      .filter(([k, v]) => v !== "[MASKED]")
+      .map(([k, v]) => `  -H "${k}: ${v}"`)
+      .join(" \\\n");
+    const body = requestData.body ? `  -d '${requestData.body}'` : "";
+    const curl = `curl -X ${requestData.http_method} "${baseUrl}${requestData.path}" \\\n${headers}${body ? " \\\n" + body : ""}`;
+    navigator.clipboard.writeText(curl).then(() => showToast("cURL copied!"));
+  }
+
+  function showToast(msg) {
+    const t = document.createElement("div");
+    t.textContent = msg;
+    t.className = "fixed bottom-6 right-6 bg-slate-900 text-white text-sm px-4 py-2 rounded-lg shadow-lg z-50";
+    document.body.appendChild(t);
+    setTimeout(() => { t.style.opacity = "0"; t.style.transition = "opacity 0.3s"; setTimeout(() => t.remove(), 300); }, 2000);
+  }
+</script>
+

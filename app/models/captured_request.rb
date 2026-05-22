@@ -32,14 +32,10 @@ class CapturedRequest < ApplicationRecord
 
 
   def self.ransackable_associations(auth_object = nil)
-  ["http_bin", "matched_rule"]
+  [ "http_bin", "matched_rule" ]
   end
-  
+
   def self.ransackable_attributes(auth_object = nil)
-    ["body", "content_type", "created_at", "duration_ms", "headers", "http_bin_id", "http_method", "id", "id_value", "matched_mock", "matched_rule_id", "path", "query_params", "remote_ip", "request_id", "response_body", "response_headers", "response_status", "updated_at"]
+    [ "body", "content_type", "created_at", "duration_ms", "headers", "http_bin_id", "http_method", "id", "id_value", "matched_mock", "matched_rule_id", "path", "query_params", "remote_ip", "request_id", "response_body", "response_headers", "response_status", "updated_at" ]
   end
-
-
 end
-
-

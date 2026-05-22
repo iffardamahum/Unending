@@ -1,6 +1,18 @@
 ActiveAdmin.register MockRule do
   menu label: "Mock Rules"
 
+  belongs_to :http_bin
+
+  form do |f|
+   f.inputs do
+     f.input :response_status, label: "HTTP Status"
+     f.input :response_body, as: :json_editor  # Custom input
+     f.input :response_headers, as: :json_editor
+     f.input :delay_ms, label: "Delay (ms)"
+  end
+    f.actions
+  end
+
   permit_params :name, :description, :http_method, :path_pattern,
                 :response_status, :response_body, :content_type,
                 :delay_ms, :priority, :enabled, :use_regex,
