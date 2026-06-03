@@ -3,10 +3,6 @@ class OmniauthCallbacksController < Devise::OmniauthCallbacksController
     handle_auth "Google"
   end
 
-  # def github
-  # handle_auth "GitHub"
-  # end
-
   def failure
     redirect_to root_path, alert: "Authentication failed. Please try again."
   end

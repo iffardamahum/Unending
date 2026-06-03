@@ -3,6 +3,7 @@
 dev_user = User.find_or_create_by!(email: "dev@example.com") do |u|
   u.password = "password123"
   u.password_confirmation = "password123"
+  u.admin = true
 end
 puts "✓ Dev user: dev@example.com / password123"
 

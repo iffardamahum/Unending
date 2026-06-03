@@ -1,25 +1,43 @@
 <% content_for :title, "New HTTP Bin – Marco Polo" %>
 
-<div class="mb-6">
-  <h1 class="text-2xl font-bold text-slate-900">New HTTP Bin</h1>
-  <p class="text-slate-500 mt-1">Create a unique URL to start capturing requests.</p>
+<%# Breadcrumb %>
+<div class="text-[12px] text-mp-faint mb-2.5 flex items-center gap-1.5">
+  <%= link_to "HTTP Bins", http_bins_path, class: "text-mp-muted-text no-underline hover:underline" %>
+  <span class="opacity-40">／</span>
+  <span class="text-mp-text">New Bin</span>
 </div>
 
-<div class="max-w-lg">
-  <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-    <%= form_with model: @bin, class: "space-y-5" do |f| %>
-      <div>
-        <%= f.label :name, class: "block text-sm font-medium text-slate-700 mb-1" %>
-        <%= f.text_field :name, class: "w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500", placeholder: "e.g. Payment Service Tests" %>
-      </div>
-      <div>
-        <%= f.label :description, class: "block text-sm font-medium text-slate-700 mb-1" %>
-        <%= f.text_area :description, rows: 3, class: "w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500", placeholder: "What is this bin for?" %>
-      </div>
-      <div class="flex gap-3">
-        <%= f.submit "Create Bin", class: "bg-indigo-600 text-white px-5 py-2 rounded-lg text-sm hover:bg-indigo-700 cursor-pointer" %>
-        <%= link_to "Cancel", http_bins_path, class: "text-sm text-slate-500 hover:text-slate-700" %>
-      </div>
-    <% end %>
+<div class="flex items-center gap-3.5 mb-7">
+  <div class="w-11 h-11 bg-mp-primary-dim border border-mp-primary-bdr rounded-xl flex items-center justify-center text-[22px] shrink-0">🗂️</div>
+  <div>
+    <h1 class="text-[1.5rem] font-bold m-0 tracking-tight">New HTTP Bin</h1>
+    <p class="text-[12px] text-mp-muted-text mt-1 mb-0">Create a unique URL to start capturing requests.</p>
+  </div>
+</div>
+
+<div class="max-w-[540px]">
+  <div class="bg-mp-card border border-mp-border rounded-2xl overflow-hidden shadow-[0_24px_64px_rgba(0,0,0,0.4)] transition-colors duration-200">
+    <div class="p-6 pb-4">
+      <%= form_with model: @bin do |f| %>
+
+        <div class="mb-4">
+          <%= f.label :name, class: "block text-[12px] font-medium text-mp-text mb-1.5" %>
+          <%= f.text_field :name, class: "w-full bg-mp-elevated border border-mp-border-hi rounded-lg text-mp-text text-[13px] font-sans p-2 px-3 outline-none transition-all duration-150 focus:border-mp-primary focus:ring-4 focus:ring-mp-primary-dim placeholder:text-mp-faint", placeholder: "e.g. Payment Service Tests" %>
+        </div>
+
+        <div class="mb-4">
+          <%= f.label :description, class: "block text-[12px] font-medium text-mp-text mb-1.5" %>
+          <%= f.text_area :description, rows: 3, class: "w-full bg-mp-elevated border border-mp-border-hi rounded-lg text-mp-text text-[13px] font-sans p-2 px-3 outline-none transition-all duration-150 focus:border-mp-primary focus:ring-4 focus:ring-mp-primary-dim placeholder:text-mp-faint resize-y", placeholder: "What is this bin for?" %>
+        </div>
+
+        <div class="bg-mp-elevated border-t border-mp-border p-4 px-6 flex items-center gap-3 -mx-6 -mb-4 mt-6">
+          <%= f.submit "Create Bin",
+                class: "bg-mp-primary text-white border-none rounded-lg text-[13px] font-semibold py-2 px-[22px] cursor-pointer font-sans shadow-[0_4px_16px_rgba(139,92,246,0.3)] transition-all hover:opacity-90 active:scale-[0.98]" %>
+          <%= link_to "Cancel", http_bins_path,
+                class: "text-[13px] text-mp-faint no-underline hover:text-mp-text transition-colors" %>
+        </div>
+
+      <% end %>
+    </div>
   </div>
 </div>

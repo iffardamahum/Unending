@@ -1,41 +1,55 @@
 <% content_for :title, "HTTP Bins – Marco Polo" %>
 
-<div class="flex items-center justify-between mb-6">
-  <h1 class="text-2xl font-bold text-slate-900">HTTP Bins</h1>
-  <%= link_to "+ New Bin", new_http_bin_path, class: "bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-indigo-700" %>
+<div class="flex items-center justify-between mb-8">
+  <div>
+    <h1 class="text-[1.5rem] font-bold tracking-tight m-0 text-mp-text">HTTP Bins</h1>
+    <p class="text-[13px] text-mp-muted-text mt-1 mb-0">All your captured-request endpoints</p>
+  </div>
+  <%= link_to "+ New Bin", new_http_bin_path, class: "bg-mp-primary text-white border-none rounded-[9px] py-2.5 px-[22px] text-[13px] font-semibold cursor-pointer font-sans no-underline shadow-[0_4px_18px_rgba(139,92,246,0.35)] tracking-tight transition-all duration-150 inline-block hover:opacity-90 hover:shadow-[0_4px_24px_rgba(139,92,246,0.5)]" %>
 </div>
 
 <% if @bins.any? %>
-  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
     <% @bins.each do |bin| %>
-      <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 hover:border-indigo-300 transition">
-        <div class="flex items-start justify-between">
-          <div>
-            <%= link_to bin.name, http_bin_path(bin), class: "font-semibold text-slate-900 hover:text-indigo-600" %>
-            <p class="text-xs text-slate-400 mt-0.5 font-mono">/b/<%= bin.token %></p>
+      <% req_count = bin.captured_requests.count %>
+      <div class="bg-mp-card border border-mp-border rounded-[14px] p-5 transition-all duration-200 hover:border-mp-primary-bdr hover:shadow-[0_4px_20px_rgba(139,92,246,0.1)]">
+        <div class="flex items-start justify-between gap-3 mb-2.5">
+          <div class="min-w-0">
+            <%= link_to bin.name, http_bin_path(bin),
+                  class: "font-semibold text-[14px] text-mp-text block overflow-hidden text-overflow-ellipsis whitespace-nowrap no-underline hover:text-mp-primary transition-colors" %>
+            <code class="text-[10px] text-mp-faint font-mono">/b/<%= bin.token.truncate(20, omission:"…") %></code>
           </div>
-          <span class="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded">
-            <%= bin.captured_requests.count %> reqs
+          <span class="inline-flex items-center justify-center text-[11px] font-bold py-1 px-2.5 rounded-full shrink-0 <%= req_count > 0 ? 'bg-mp-primary-dim text-mp-primary-hi' : 'bg-mp-elevated text-mp-faint' %>">
+            <%= req_count %> reqs
           </span>
         </div>
+
         <% if bin.description.present? %>
-          <p class="text-sm text-slate-500 mt-2"><%= bin.description.truncate(80) %></p>
+          <p class="text-[12px] text-mp-muted-text mt-0 mb-3.5"><%= bin.description.truncate(90) %></p>
         <% end %>
-        <div class="flex gap-3 mt-4 text-xs">
-          <%= link_to "View", http_bin_path(bin), class: "text-indigo-600 hover:underline" %>
-          <%= link_to "Edit", edit_http_bin_path(bin), class: "text-slate-400 hover:text-slate-600" %>
+
+        <div class="flex items-center gap-3 pt-3 border-t border-mp-border">
+          <%= link_to "View", http_bin_path(bin),
+                class: "text-[12px] text-mp-primary font-semibold no-underline hover:underline" %>
+          <%= link_to "Edit", edit_http_bin_path(bin),
+                class: "text-[12px] text-mp-muted-text no-underline hover:underline" %>
           <%= button_to "Delete", http_bin_path(bin), method: :delete,
                 data: { turbo_confirm: "Delete this bin and all its data?" },
-                class: "text-red-400 hover:text-red-600" %>
+                class: "text-[12px] text-mp-red bg-transparent border-none p-0 cursor-pointer font-sans font-medium hover:underline" %>
+          <span class="flex-1"></span>
+          <span class="text-[10px] text-mp-faint">
+            <%= time_ago_in_words(bin.created_at) %> ago
+          </span>
         </div>
       </div>
     <% end %>
   </div>
+
 <% else %>
-  <div class="bg-white rounded-xl border border-dashed border-slate-300 p-16 text-center">
-    <div class="text-4xl mb-3">🗂️</div>
-    <h3 class="text-lg font-semibold text-slate-700 mb-2">No bins yet</h3>
-    <p class="text-slate-400 text-sm mb-6">Create a bin to start capturing HTTP requests.</p>
-    <%= link_to "Create your first bin →", new_http_bin_path, class: "bg-indigo-600 text-white px-6 py-2 rounded-lg text-sm hover:bg-indigo-700" %>
+  <div class="bg-mp-card border border-dashed border-mp-border-hi rounded-2xl py-20 px-4 text-center transition-colors duration-200">
+    <div class="text-[3rem] mb-3 opacity-55">🗂️</div>
+    <h3 class="text-[1.1rem] font-semibold text-mp-text mt-0 mb-2">No bins yet</h3>
+    <p class="text-[13px] text-mp-muted-text mt-0 mb-6">Create a bin to start capturing HTTP requests.</p>
+    <%= link_to "Create your first bin →", new_http_bin_path, class: "bg-mp-primary text-white border-none rounded-[9px] py-2.5 px-[22px] text-[13px] font-semibold cursor-pointer font-sans no-underline shadow-[0_4px_18px_rgba(139,92,246,0.35)] tracking-tight transition-all duration-150 inline-block hover:opacity-90 hover:shadow-[0_4px_24px_rgba(139,92,246,0.5)]" %>
   </div>
 <% end %>

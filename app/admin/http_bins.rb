@@ -13,7 +13,6 @@ ActiveAdmin.register HttpBin do
       bin.captured_requests.count
     end
     column :created_at
-    column :expires_at
     actions
   end
   # Edit form
@@ -22,7 +21,6 @@ ActiveAdmin.register HttpBin do
      f.input :name
      f.input :description
      f.input :user_id
-     f.input :expires_at
    end
    f.actions
   end
@@ -34,7 +32,6 @@ ActiveAdmin.register HttpBin do
      row :token
      row :user_id
      row :request_count
-     row :expires_at
      row :created_at
       row :updated_at
   end
@@ -47,7 +44,6 @@ ActiveAdmin.register HttpBin do
         column :response_status
         column :matched_mock
         column :created_at
-        column :expires_at
       end
     end
 

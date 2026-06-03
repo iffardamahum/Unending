@@ -28,6 +28,8 @@ module Marcopolo
     # Common ones are `templates`, `generators`, or `middleware`, for example.
     config.autoload_lib(ignore: %w[assets tasks])
     config.active_job.queue_adapter = :sidekiq
+    config.assets.paths << ActiveAdmin::Engine.root.join("app", "assets", "stylesheets")
+    config.assets.paths << ActiveAdmin::Engine.root.join("app", "assets", "javascripts")
 
     # Configuration for the application, engines, and railties goes here.
     #

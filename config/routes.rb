@@ -1,7 +1,12 @@
 Rails.application.routes.draw do
-  devise_for :users, controllers: {
-  omniauth_callbacks: "omniauth_callbacks"
-}
+  constraints ->(request) {
+    ActionMailer::Base.default_url_options = { host: request.host, port: request.port }
+    true
+  } do
+    devise_for :users, controllers: {
+      omniauth_callbacks: "omniauth_callbacks"
+    }
+  end
   ActiveAdmin.routes(self)
 
   # Health check

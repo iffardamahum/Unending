@@ -1,20 +1,27 @@
-<% content_for :title, "Sign in — Marco Polo" %>
+<% content_for :title, "Sign in – Marco Polo" %>
 
-<div class="min-h-[80vh] flex items-center justify-center">
-  <div class="w-[360px] text-center">
+<%# Top bar %>
+<div class="fixed top-0 left-0 right-0 h-[52px] flex items-center justify-between px-5 bg-mp-bg border-b border-mp-border z-50 transition-colors duration-200">
+  <a href="/" class="flex items-center gap-2 text-[14px] font-semibold text-mp-text no-underline tracking-tight">
+      <%= image_tag "valbury.png", alt: "Marco Polo", class: "w-8 h-8 object-contain" %>
+  </a>
+  <button id="auth-theme-btn" class="w-8 h-8 bg-mp-elevated border border-mp-border-hi rounded-lg cursor-pointer flex items-center justify-center text-[15px] transition-colors duration-200 shrink-0 p-0 leading-none hover:bg-mp-muted" onclick="authToggleTheme()" title="Toggle theme">🌙</button>
+</div>
 
-    <div class="w-14 h-14 mx-auto mb-5 rounded-2xl border border-slate-200 bg-slate-50 flex items-center justify-center text-3xl">
-      🧭
-    </div>
+<%# Centered sign-in form %>
+<div class="min-h-screen flex items-center justify-center pt-[72px] p-4 pb-8">
+  <div class="w-full max-w-[360px] text-center">
 
-    <h1 class="text-2xl font-semibold text-slate-900 mb-1">Sign in</h1>
-    <p class="text-sm text-slate-500 mb-8">to Marco Polo</p>
+      <div class="w-14 h-14 mx-auto mb-5 bg-linear-to-br from-violet-500 to-violet-700 rounded-2xl flex items-center justify-center shadow-[0_8px_24px_rgba(109,40,217,0.4)]">
+        <%= image_tag "valbury.png", alt: "Marco Polo", class: "w-8 h-8 object-contain" %>
+      </div>
 
-    <%# OAuth %>
-    <div class="border border-slate-200 rounded-2xl overflow-hidden mb-4 bg-white">
-      <%= link_to user_google_oauth2_omniauth_authorize_path,
-            class: "flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition border-b border-slate-200" do %>
-        <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24">
+    <h1 class="text-[1.5rem] font-bold tracking-tight m-0 mb-1">Sign in</h1>
+    <p class="text-[13px] text-mp-muted-text m-0 mb-6">to Marco Polo</p>
+
+    <div class="bg-mp-card border border-mp-border rounded-2xl overflow-hidden mb-4 transition-colors duration-200">
+      <%= link_to user_google_oauth2_omniauth_authorize_path, class: "flex items-center gap-3 p-3 px-4 text-[13px] text-mp-text no-underline transition-colors hover:bg-mp-elevated" do %>
+        <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24">
           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
           <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
           <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
@@ -22,47 +29,55 @@
         </svg>
         Continue with Google
       <% end %>
-
-      <%= link_to user_github_omniauth_authorize_path,
-            class: "flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition" do %>
-        <svg class="w-5 h-5 flex-shrink-0 fill-slate-800" viewBox="0 0 24 24">
-          <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
-        </svg>
-        Continue with GitHub
-      <% end %>
     </div>
 
-    <%# Divider %>
-    <div class="flex items-center gap-3 mb-4">
-      <div class="flex-1 h-px bg-slate-200"></div>
-      <span class="text-xs text-slate-400">or</span>
-      <div class="flex-1 h-px bg-slate-200"></div>
-    </div>
+    <div class="flex items-center gap-3 mb-4 text-mp-faint text-[11px] before:content-[''] before:flex-1 before:h-px before:bg-mp-border after:content-[''] after:flex-1 after:h-px after:bg-mp-border">or</div>
 
-    <%# Email + Password %>
     <%= form_for resource, as: resource_name, url: session_path(resource_name) do |f| %>
-      <div class="border border-slate-200 rounded-2xl overflow-hidden bg-white mb-4">
-        <div class="px-4 py-3 border-b border-slate-200">
-          <%= f.email_field :email,
-                autofocus: true,
-                placeholder: "Email",
-                class: "w-full text-sm text-slate-700 outline-none bg-transparent placeholder-slate-400" %>
+      <div class="bg-mp-card border border-mp-border rounded-2xl overflow-hidden mb-4 transition-colors duration-200">
+        <div class="p-3 px-4 border-b border-mp-border">
+          <%= f.email_field :email, autofocus: true, autocomplete: "email", placeholder: "Email",
+                class: "w-full bg-transparent border-none outline-none text-[13px] text-mp-text placeholder:text-mp-faint" %>
         </div>
-        <div class="px-4 py-3 border-b border-slate-200">
-          <%= f.password_field :password,
-                placeholder: "Password",
-                class: "w-full text-sm text-slate-700 outline-none bg-transparent placeholder-slate-400" %>
+        <div class="p-3 px-4 border-b border-mp-border last:border-b-0">
+          <%= f.password_field :password, autocomplete: "current-password", placeholder: "Password",
+                class: "w-full bg-transparent border-none outline-none text-[13px] text-mp-text placeholder:text-mp-faint" %>
         </div>
-        <%= f.submit "Sign in",
-              class: "w-full px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer bg-transparent" %>
+        <button type="submit" class="w-full p-3 px-4 bg-mp-primary text-white border-none text-[13px] font-semibold cursor-pointer font-sans transition-opacity hover:opacity-90 tracking-tight">Sign in</button>
       </div>
+
+      <% if devise_mapping.rememberable? %>
+        <div class="flex items-center justify-between px-0.5 mb-3 text-[12px] text-mp-faint">
+          <label class="flex items-center gap-1.5 cursor-pointer">
+            <%= f.check_box :remember_me, class: "w-3.5 h-3.5 accent-mp-primary cursor-pointer" %>
+            Remember me
+          </label>
+          <%= link_to "Forgot password?", new_password_path(resource_name), class: "text-mp-primary no-underline hover:underline" %>
+        </div>
+      <% end %>
     <% end %>
 
-    <p class="text-sm text-slate-500">
+    <p class="text-[13px] text-mp-muted-text">
       Don't have an account?
-      <%= link_to "Sign up", new_registration_path(resource_name), class: "text-indigo-600 hover:underline" %>
+      <%= link_to "Sign up", new_registration_path(resource_name), class: "text-mp-primary font-semibold no-underline hover:underline" %>
     </p>
 
-    <p class="text-xs text-slate-400 mt-6">Internal platform · Marcopolo v1.0</p>
+    <p class="text-[11px] text-mp-faint mt-6">Internal platform · Marcopolo v1.0</p>
   </div>
 </div>
+
+<script>
+  (function() {
+    var t = localStorage.getItem("mp-theme") || "dark";
+    document.documentElement.dataset.theme = t;
+    var btn = document.getElementById("auth-theme-btn");
+    if (btn) btn.textContent = t === "dark" ? "🌙" : "☀️";
+  })();
+
+  function authToggleTheme() {
+    var next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    localStorage.setItem("mp-theme", next);
+    document.getElementById("auth-theme-btn").textContent = next === "dark" ? "🌙" : "☀️";
+  }
+</script>

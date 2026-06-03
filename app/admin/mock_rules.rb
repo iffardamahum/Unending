@@ -16,7 +16,8 @@ ActiveAdmin.register MockRule do
   permit_params :name, :description, :http_method, :path_pattern,
                 :response_status, :response_body, :content_type,
                 :delay_ms, :priority, :enabled, :use_regex,
-                :http_bin_id
+                :http_bin_id, :response_headers, :expires_at,
+                response_headers: {}
 
   index do
     selectable_column
@@ -29,6 +30,7 @@ ActiveAdmin.register MockRule do
     column :enabled
     column :priority
     column :created_at
+    column :expires_at
     actions
   end
 
@@ -69,6 +71,10 @@ ActiveAdmin.register MockRule do
       f.input :content_type
       f.input :delay_ms
       f.input :response_body, as: :text, input_html: { rows: 8 }
+      f.input :response_headers, as: :text,
+              input_html: { rows: 4 },
+              hint: "format JSON"
+      f.input :expires_at, as: :datepicker, label: "Expires At"
     end
     f.inputs "Options" do
       f.input :priority

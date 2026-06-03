@@ -81,3 +81,5 @@ end
 
 gem "figaro", "~> 1.3"
 gem "fiddle"
+gem "dartsass-rails"
+gem "byebug"

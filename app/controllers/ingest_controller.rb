@@ -44,21 +44,51 @@ class IngestController < ActionController::Base
 
   def find_bin
     @bin = HttpBin.find_by!(token: params[:token])
-    if @bin.expires_at.present? && @bin.expires_at < Time.current
-      render json: { error: "Bin has expired" }, status: :gone
+    if @bin.nil?
+      render json: { error: "Bin not found" }, status: :not_found
     end
-  rescue ActiveRecord::RecordNotFound
-    render json: { error: "Bin not found" }, status: :not_found
   end
 
   def check_rate_limit
-    key = "rate_limit:#{@bin.token}"
-    count = REDIS.incr(key)
-    REDIS.expire(key, 60) if count == 1 # 60 = 1 minute expiration for the key
+    @rule = find_matching_rule
 
-    if count > 5  # count how many times you want to allow per minute
-    render json: { error: "Rate limit exceeded. Try again in a minute" },
-           status: :too_many_requests
+    if @rule && @rule.rate_limit_enabled?
+      redis = Redis.new
+      seconds = case @rule.rate_limit_period
+      when "minute" then 60
+      when "hour"   then 3600
+      when "day"    then 86400
+      else 60
+      end
+
+      if @rule.rate_limit_type == "api_key" || @rule.rate_limit_type == "both"
+        api_key = request.headers["X-Marcopolo-key"]
+        if api_key.blank?
+          render json: {
+            error: "Unauthorized",
+            message: "Missing API key. This rule requires a valid API key in the X-Marcopolo-key header."
+          }, status: 401
+          return
+        end
+        identifier = @rule.rate_limit_type == "both" ? "#{request.remote_ip.gsub(':', '-')}:#{api_key}" : api_key
+      else
+        identifier = request.remote_ip.to_s.gsub(":", "-")
+      end
+      safe_ip = request.remote_ip.to_s.gsub(":", "-")
+      redis_key = "rate_limit:rule:#{@rule.id}:#{safe_ip},#{identifier}"
+      current_hits = redis.get(redis_key).to_i
+      if current_hits >= @rule.rate_limit_count
+        render json: {
+          error: "Rate limit exceeded!",
+          message: "This rule allows #{@rule.rate_limit_count} request per #{@rule.rate_limit_period}."
+        }, status: 429
+        nil
+      else
+          redis.multi do |multi|
+          multi.incr(redis_key)
+          multi.expire(redis_key, seconds) if current_hits == 0
+        end
+      end
     end
   end
 

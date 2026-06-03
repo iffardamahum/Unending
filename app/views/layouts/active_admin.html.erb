@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Admin – Marco Polo</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+
+    <%# Load ActiveAdmin CSS from CDN — bypass Propshaft issue %>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/activeadmin-theme@1.0.0/active_admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <%= active_admin_javascript_tag %>
+  </head>
+  <body class="<%= body_class %>">
+    <%= render 'active_admin/shared/header' %>
+    <%= render 'active_admin/shared/sidebar' %>
+
+    <div id="active_admin_content" class="<%= skip_sidebar? ? 'without_sidebar' : 'with_sidebar' %>">
+      <%= render 'active_admin/shared/title_bar' %>
+      <%= yield %>
+    </div>
+
+    <%= render 'active_admin/shared/footer' %>
+  </body>
+</html>
