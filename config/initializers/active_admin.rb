@@ -4,12 +4,13 @@ ActiveAdmin.setup do |config|
   # Set the title that is displayed on the main layout
   # for each of the active admin pages.
   #
+  config.use_webpacker = false
   config.site_title = "Marcopolo"
 
   # Set the link url for the title. For example, to take
-  # users to your main site. Defaults to no link.
+  # users to your main site. Defaulraits to no link.
   #
-  # config.site_title_link = "/"
+  config.site_title_link = :root
 
   # Set an optional image to be displayed for the header
   # instead of a string (overrides :site_title)
@@ -71,7 +72,7 @@ ActiveAdmin.setup do |config|
   #
   # This setting changes the method which Active Admin calls
   # within the application controller.
-  # config.authentication_method = :authenticate_admin_user!
+  config.authentication_method = :authenticate_admin_user!
 
   # == User Authorization
   #
@@ -108,7 +109,7 @@ ActiveAdmin.setup do |config|
   #
   # This setting changes the method which Active Admin calls
   # (within the application controller) to return the currently logged in user.
-  # config.current_user_method = :current_admin_user
+  config.current_user_method = :current_admin_user
 
   # == Logging Out
   #
@@ -120,7 +121,8 @@ ActiveAdmin.setup do |config|
   # will call the method to return the path.
   #
   # Default:
-  config.logout_link_path = :destroy_admin_user_session_path
+  config.logout_link_path = :destroy_user_session_path
+
 
   # This setting changes the http method used when rendering the
   # link. For example :get, :delete, :put, etc..
@@ -174,7 +176,7 @@ ActiveAdmin.setup do |config|
   # You can exclude possibly sensitive model attributes from being displayed,
   # added to forms, or exported by default by ActiveAdmin
   #
-  config.filter_attributes = [:encrypted_password, :password, :password_confirmation]
+  config.filter_attributes = [ :encrypted_password, :password, :password_confirmation ]
 
   # == Localize Date/Time Format
   #
@@ -225,7 +227,7 @@ ActiveAdmin.setup do |config|
   # and feel.
   #
   # To load a stylesheet:
-  #   config.register_stylesheet 'my_stylesheet.css'
+  #   config.register_stylesheet "active_admin.css"
   #
   # You can provide an options hash for more control, which is passed along to stylesheet_link_tag():
   #   config.register_stylesheet 'my_print_stylesheet.css', media: :print
@@ -348,5 +350,5 @@ ActiveAdmin.setup do |config|
   # By default, Active Admin uses Sprocket's asset pipeline.
   # You can switch to using Webpacker here.
   #
-  # config.use_webpacker = true
+  config.use_webpacker = false
 end

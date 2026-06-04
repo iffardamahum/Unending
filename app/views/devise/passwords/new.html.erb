@@ -1,0 +1,61 @@
+<% content_for :title, "Reset password – Marco Polo" %>
+
+<%# Top bar %>
+<div class="fixed top-0 left-0 right-0 h-[52px] flex items-center justify-between px-5 bg-mp-bg border-b border-mp-border z-50 transition-colors duration-200">
+  <a href="/" class="flex items-center gap-2 text-[14px] font-semibold text-mp-text no-underline tracking-tight">
+    <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center text-[16px] shadow-[0_4px_12px_rgba(109,40,217,0.35)] shrink-0">🧭</div>
+    Marco Polo
+  </a>
+  <button id="auth-theme-btn" class="w-8 h-8 bg-mp-elevated border border-mp-border-hi rounded-lg cursor-pointer flex items-center justify-center text-[15px] transition-colors duration-200 shrink-0 p-0 leading-none hover:bg-mp-muted" onclick="authToggleTheme()" title="Toggle theme">🌙</button>
+</div>
+
+<%# Centered reset password form %>
+<div class="min-h-screen flex items-center justify-center pt-[72px] p-4 pb-8">
+  <div class="w-full max-w-[360px] text-center">
+
+    <div class="w-14 h-14 mx-auto mb-5 bg-gradient-to-br from-violet-500 to-violet-700 rounded-2xl flex items-center justify-center text-[28px] shadow-[0_8px_24px_rgba(109,40,217,0.4)]">
+      🧭
+    </div>
+
+    <h1 class="text-[1.5rem] font-bold tracking-tight m-0 mb-1">Forgot password?</h1>
+    <p class="text-[13px] text-mp-muted-text m-0 mb-6">We'll send you reset instructions</p>
+
+    <%= form_for resource, as: resource_name, url: password_path(resource_name), html: { method: :post } do |f| %>
+      <% if resource.errors.any? %>
+        <div class="mb-3 p-2.5 px-3.5 bg-red-500/10 border border-red-500/25 rounded-xl text-[12px] text-red-400 text-left">
+          <% resource.errors.full_messages.each do |msg| %><p class="my-0.5"><%= msg %></p><% end %>
+        </div>
+      <% end %>
+
+      <div class="bg-mp-card border border-mp-border rounded-2xl overflow-hidden mb-4 transition-colors duration-200">
+        <div class="p-3 px-4 border-b border-mp-border last:border-b-0">
+          <%= f.email_field :email, autofocus: true, autocomplete: "email", placeholder: "Email",
+                class: "w-full bg-transparent border-none outline-none text-[13px] text-mp-text placeholder:text-mp-faint" %>
+        </div>
+        <button type="submit" class="w-full p-3 px-4 bg-mp-primary text-white border-none text-[13px] font-semibold cursor-pointer font-sans transition-opacity hover:opacity-90 tracking-tight">Send reset instructions</button>
+      </div>
+    <% end %>
+
+    <p class="text-[13px] text-mp-muted-text">
+      Remember it?
+      <%= link_to "Sign in", new_session_path(resource_name), class: "text-mp-primary font-semibold no-underline hover:underline" %>
+    </p>
+
+    <p class="text-[11px] text-mp-faint mt-6">Internal platform · Marcopolo v1.0</p>
+  </div>
+</div>
+
+<script>
+  (function() {
+    var t = localStorage.getItem("mp-theme") || "dark";
+    document.documentElement.dataset.theme = t;
+    var btn = document.getElementById("auth-theme-btn");
+    if (btn) btn.textContent = t === "dark" ? "🌙" : "☀️";
+  })();
+  function authToggleTheme() {
+    var next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    localStorage.setItem("mp-theme", next);
+    document.getElementById("auth-theme-btn").textContent = next === "dark" ? "🌙" : "☀️";
+  }
+</script>

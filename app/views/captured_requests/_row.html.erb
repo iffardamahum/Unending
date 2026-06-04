@@ -1,31 +1,38 @@
-<tr id="captured_request_<%= captured_request.id %>" class="hover:bg-slate-50">
-  <td class="px-4 py-2.5">
-    <span class="text-xs font-mono font-bold px-1.5 py-0.5 rounded
-      <%= captured_request.http_method == 'GET' ? 'bg-blue-100 text-blue-700' :
-          captured_request.http_method == 'POST' ? 'bg-green-100 text-green-700' :
-          captured_request.http_method == 'DELETE' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700' %>">
-      <%= captured_request.http_method %>
-    </span>
+<%
+  method_classes = {
+    "GET"    => "bg-blue-500/15 text-blue-400",
+    "POST"   => "bg-emerald-500/15 text-emerald-400",
+    "PUT"    => "bg-amber-500/15 text-amber-400",
+    "PATCH"  => "bg-violet-500/15 text-violet-400",
+    "DELETE" => "bg-red-500/15 text-red-400",
+  }
+  method_cls = method_classes[captured_request.http_method] || "bg-violet-500/15 text-violet-400"
+  status_ok  = captured_request.response_status < 400
+%>
+<tr id="captured_request_<%= captured_request.id %>" class="border-t border-[#14141f] hover:bg-mp-primary-dim transition-colors duration-150">
+  <td class="py-2.5 px-3.5 align-middle">
+    <span class="inline-block font-mono text-[10px] font-bold py-0.5 px-2 rounded <%= method_cls %>"><%= captured_request.http_method %></span>
   </td>
-  <td class="px-4 py-2.5 font-mono text-xs text-slate-700 max-w-[200px] truncate">
+  <td class="py-2.5 px-3.5 align-middle font-mono text-[11px] text-mp-muted-text max-w-[200px] overflow-hidden text-overflow-ellipsis whitespace-nowrap">
     <%= captured_request.path %>
   </td>
-  <td class="px-4 py-2.5 text-xs font-semibold
-    <%= captured_request.response_status < 400 ? 'text-green-600' : 'text-red-500' %>">
-    <%= captured_request.response_status %>
+  <td class="py-2.5 px-3.5 align-middle">
+    <span class="font-mono text-[12px] font-bold <%= status_ok ? 'text-mp-green' : 'text-mp-red' %>">
+      <%= captured_request.response_status %>
+    </span>
   </td>
-  <td class="px-4 py-2.5 text-center">
-    <%= captured_request.matched_mock ? "✅" : "<span class='text-slate-300'>—</span>".html_safe %>
+  <td class="py-2.5 px-3.5 align-middle text-center">
+    <%= captured_request.matched_mock ? "✅" : "<span class='text-mp-faint'>—</span>".html_safe %>
   </td>
-  <td class="px-4 py-2.5 text-xs text-slate-400">
+  <td class="py-2.5 px-3.5 align-middle font-mono text-[11px] text-mp-faint">
     <%= "#{captured_request.duration_ms}ms" if captured_request.duration_ms %>
   </td>
-  <td class="px-4 py-2.5 text-xs text-slate-400">
+  <td class="py-2.5 px-3.5 align-middle text-[11px] text-mp-faint">
     <%= time_ago_in_words(captured_request.created_at) %> ago
   </td>
-  <td class="px-4 py-2.5">
+  <td class="py-2.5 px-3.5 align-middle">
     <%= link_to "View",
-      http_bin_captured_request_path(captured_request.http_bin_id, captured_request),
-      class: "text-xs text-indigo-500 hover:underline" %>
+          http_bin_captured_request_path(captured_request.http_bin_id, captured_request),
+          class: "text-[12px] text-mp-primary font-medium no-underline hover:underline" %>
   </td>
 </tr>

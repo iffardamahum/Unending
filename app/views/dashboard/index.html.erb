@@ -1,77 +1,129 @@
 <% content_for :title, "Dashboard – Marco Polo" %>
 
-<div class="mb-8">
-  <h1 class="text-2xl font-bold text-slate-900">Dashboard</h1>
-  <p class="text-slate-500 mt-1">Welcome back, <strong><%= current_user.email %></strong></p>
+<%
+  avg_ms = begin
+    all = @bins.flat_map { |b| b.captured_requests.pluck(:duration_ms).compact }
+    all.any? ? (all.sum / all.size.to_f).round : 0
+  rescue
+    0
+  end
+
+  if @stats[:yesterday] == 0
+    trend       = "No data yesterday"
+    trend_color = "text-mp-faint"
+  else
+    diff = @stats[:today] - @stats[:yesterday]
+    pct  = ((diff.to_f / @stats[:yesterday]) * 100).round
+    if diff > 0
+      trend       = "↑ #{pct}% from yesterday"
+      trend_color = "text-mp-green"
+    elsif diff < 0
+      trend       = "↓ #{pct.abs}% from yesterday"
+      trend_color = "text-mp-red"
+    else
+      trend       = "Same as yesterday"
+      trend_color = "text-mp-faint"
+    end
+  end
+
+  stat_cards = [
+    { label: "Total Endpoints",   value: @bins.count,
+      sub: "+#{@bins.count { |b| b.created_at >= 7.days.ago }} this week",
+      sub_color: "text-violet-300", border: "border-l-mp-primary" },
+    { label: "Today's Requests",  value: @stats[:today],
+      sub: trend, sub_color: trend_color, border: "border-l-mp-green" },
+    { label: "Avg Response Time", value: "#{avg_ms}ms",
+      sub: "Mock overhead",      sub_color: "text-mp-faint", border: "border-l-purple-500" },
+    { label: "Mock Rules",        value: @stats[:total_rules],
+      sub: "Across all endpoints", sub_color: "text-mp-faint", border: "border-l-orange-500" },
+  ]
+%>
+
+<%# ── Page header ── %>
+<div class="flex items-start justify-between mb-10">
+  <div>
+    <h1 class="text-[1.75rem] font-bold tracking-tight m-0 flex items-center gap-2.5 text-mp-text">
+      <span class="bg-mp-primary/15 border border-mp-primary/25 rounded-[10px] w-10 h-10 inline-flex items-center justify-center text-[20px] shrink-0">🧭</span>
+      Mock Endpoints
+    </h1>
+    <p class="text-mp-muted-text text-[13px] mt-1.5 mb-0">Capture, inspect, and mock HTTP requests</p>
+  </div>
+  <%= link_to "+ Create Endpoint", new_http_bin_path, class: "bg-mp-primary text-white border-none rounded-[9px] py-2.5 px-[22px] text-[13px] font-semibold cursor-pointer font-sans no-underline shadow-[0_4px_18px_rgba(139,92,246,0.35)] tracking-tight transition-all duration-150 inline-block hover:opacity-90 hover:shadow-[0_4px_24px_rgba(139,92,246,0.5)]" %>
 </div>
 
-<!-- Stats -->
-<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-  <% [
-    ["HTTP Bins",    @stats[:total_bins],     "🗂️",  "indigo"],
-    ["Requests",    @stats[:total_requests], "📡",  "blue"],
-    ["Matched",     @stats[:matched],        "✅",  "green"],
-    ["Mock Rules",  @stats[:total_rules],    "🎯",  "purple"]
-  ].each do |label, value, icon, color| %>
-    <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
-      <div class="text-2xl mb-1"><%= icon %></div>
-      <div class="text-3xl font-bold text-slate-900"><%= value %></div>
-      <div class="text-sm text-slate-500 mt-1"><%= label %></div>
+<%# ── Stat cards ── %>
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+  <% stat_cards.each do |card| %>
+    <div class="bg-mp-card border border-mp-border rounded-xl p-5 border-l-4 <%= card[:border] %> relative overflow-hidden transition-all duration-200 hover:shadow-2xl hover:shadow-black/40">
+      <div class="text-[10px] text-mp-faint uppercase tracking-widest font-semibold"><%= card[:label] %></div>
+      <div class="text-[2rem] font-bold tracking-tight text-mp-text leading-none my-2"><%= card[:value] %></div>
+      <div class="text-[11px] <%= card[:sub_color] %>"><%= card[:sub] %></div>
     </div>
   <% end %>
 </div>
 
-<!-- Bins + Recent requests -->
-<div class="grid md:grid-cols-2 gap-6">
-  <!-- Bins -->
-  <div class="bg-white rounded-xl border border-slate-200 shadow-sm">
-    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-      <h2 class="font-semibold text-slate-800">Your Bins</h2>
-      <%= link_to "+ New Bin", new_http_bin_path, class: "text-sm text-indigo-600 hover:underline" %>
-    </div>
-    <ul class="divide-y divide-slate-100">
-      <% @bins.each do |bin| %>
-        <li class="px-6 py-3 flex items-center justify-between hover:bg-slate-50">
-          <div>
-            <%= link_to bin.name, http_bin_path(bin), class: "font-medium text-slate-800 hover:text-indigo-600" %>
-            <div class="text-xs text-slate-400 font-mono mt-0.5">/b/<%= bin.token %></div>
-          </div>
-          <span class="text-xs text-slate-400"><%= bin.captured_requests.count %> reqs</span>
-        </li>
-      <% end %>
-      <% if @bins.empty? %>
-        <li class="px-6 py-8 text-center text-slate-400 text-sm">
-          No bins yet. <%= link_to "Create one →", new_http_bin_path, class: "text-indigo-500 hover:underline" %>
-        </li>
-      <% end %>
-    </ul>
+<%# ── Endpoints table ── %>
+<div class="bg-mp-card border border-mp-border rounded-[14px] overflow-hidden">
+  <div class="p-4 px-6 border-b border-mp-border flex items-center justify-between">
+    <h2 class="text-[14px] font-semibold m-0 text-mp-text">Your Endpoints</h2>
+    <span class="text-[11px] text-mp-faint"><%= @bins.count %> total</span>
   </div>
 
-  <!-- Recent Requests -->
-  <div class="bg-white rounded-xl border border-slate-200 shadow-sm">
-    <div class="px-6 py-4 border-b border-slate-100">
-      <h2 class="font-semibold text-slate-800">Recent Requests</h2>
-    </div>
-    <ul class="divide-y divide-slate-100">
-      <% @recent_requests.each do |req| %>
-        <li class="px-6 py-3 flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <span class="text-xs font-mono font-bold px-1.5 py-0.5 rounded <%= req.http_method == 'GET' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700' %>">
-              <%= req.http_method %>
+  <table class="w-full border-collapse text-[13px]">
+    <thead>
+      <tr class="bg-[#0c0c16]">
+        <th class="py-2.5 px-5 text-left text-mp-faint text-[10px] font-semibold uppercase tracking-wider">Name</th>
+        <th class="py-2.5 px-5 text-left text-mp-faint text-[10px] font-semibold uppercase tracking-wider">Token</th>
+        <th class="py-2.5 px-5 text-left text-mp-faint text-[10px] font-semibold uppercase tracking-wider">Owner</th>
+        <th class="py-2.5 px-5 text-left text-mp-faint text-[10px] font-semibold uppercase tracking-wider">Requests</th>
+        <th class="py-2.5 px-5 text-left text-mp-faint text-[10px] font-semibold uppercase tracking-wider">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @bins.each do |bin| %>
+        <% req_count = bin.captured_requests.count %>
+        <tr class="border-t border-[#14141f] hover:bg-white/[0.015] transition-colors">
+          <td class="py-3 px-5">
+            <%= link_to http_bin_path(bin),
+                  class: "flex items-center gap-2 font-semibold text-violet-300 no-underline" do %>
+              <span class="text-[16px]">🗂️</span>
+              <%= bin.name %>
+            <% end %>
+          </td>
+          <td class="py-3 px-5">
+            <code class="text-[11px] bg-mp-elevated text-mp-muted-text py-0.5 px-2 rounded-[5px] font-mono">
+              <%= bin.token.truncate(18, omission: "…") %>
+            </code>
+          </td>
+          <td class="py-3 px-5 text-mp-faint text-[12px]"><%= bin.user.email %></td>
+          <td class="py-3 px-5">
+            <span class="inline-flex items-center justify-center min-w-10 px-2.5 py-0.5 rounded-full text-[11px] font-bold <%= req_count > 0 ? 'bg-violet-500/15 text-violet-300' : 'bg-mp-elevated text-mp-faint' %>">
+              <%= req_count %>
             </span>
-            <span class="text-sm text-slate-700 truncate max-w-[160px]"><%= req.path %></span>
-          </div>
-          <div class="flex items-center gap-2 text-xs text-slate-400">
-            <span class="<%= req.response_status < 400 ? 'text-green-600' : 'text-red-500' %> font-semibold">
-              <%= req.response_status %>
-            </span>
-            <span><%= req.matched_mock ? "✅" : "—" %></span>
-          </div>
-        </li>
+          </td>
+          <td class="py-3 px-5">
+            <div class="flex items-center gap-3.5">
+              <%= link_to "View", http_bin_path(bin),
+                    class: "text-[12px] text-mp-primary font-medium no-underline hover:underline" %>
+              <%= link_to "Edit", edit_http_bin_path(bin),
+                    class: "text-[12px] text-mp-muted-text font-medium no-underline hover:underline" %>
+              <%= button_to "Delete", http_bin_path(bin), method: :delete,
+                    data: { turbo_confirm: "Delete this bin?" },
+                    class: "text-[12px] text-mp-red font-medium bg-transparent border-none p-0 cursor-pointer font-sans hover:underline" %>
+            </div>
+          </td>
+        </tr>
       <% end %>
-      <% if @recent_requests.empty? %>
-        <li class="px-6 py-8 text-center text-slate-400 text-sm">No requests yet.</li>
+
+      <% if @bins.empty? %>
+        <tr class="border-t border-[#14141f]">
+          <td colspan="5" class="text-center py-16 px-4 text-mp-faint text-[13px]">
+            No endpoints yet.<br>
+            <%= link_to "Create your first one →", new_http_bin_path,
+                  class: "text-mp-primary no-underline hover:underline mt-2 inline-block font-semibold" %>
+          </td>
+        </tr>
       <% end %>
-    </ul>
-  </div>
+    </tbody>
+  </table>
 </div>

@@ -18,7 +18,8 @@ class MockRulesController < ApplicationController
   def edit; end
 
   def update
-    if @rule.update(rule_params)
+    @rule.assign_attributes(rule_params)
+    if @rule.save
       redirect_to @bin, notice: "Mock rule updated."
     else
       render :edit, status: :unprocessable_entity
@@ -41,11 +42,18 @@ class MockRulesController < ApplicationController
   end
 
   def rule_params
+    parsed_headers = begin
+      raw = params.dig(:mock_rule, :response_headers)
+      raw.is_a?(String) ? JSON.parse(raw) : {}
+    rescue JSON::ParserError
+      {}
+    end
+
     params.require(:mock_rule).permit(
       :name, :description, :http_method, :path_pattern,
       :response_status, :response_body, :content_type,
       :delay_ms, :priority, :enabled, :use_regex,
-      response_headers: {}
-    )
+      :rate_limit_count, :rate_limit_period, :rate_limit_type, :ttl
+    ).merge(response_headers: parsed_headers)
   end
 end

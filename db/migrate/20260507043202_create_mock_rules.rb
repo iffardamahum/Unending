@@ -18,8 +18,8 @@ class CreateMockRules < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :mock_rules, [:http_bin_id, :enabled]
-    add_index :mock_rules, [:http_bin_id, :http_method, :path_pattern]
+    add_index :mock_rules, [ :http_bin_id, :enabled ]
+    add_index :mock_rules, [ :http_bin_id, :http_method, :path_pattern ]
     add_index :mock_rules, :priority
   end
 end

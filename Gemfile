@@ -24,8 +24,13 @@ gem "tailwindcss-rails"
 gem "jbuilder"
 
 # Authentication
-gem "devise", "~> 4.9"
+gem "devise", "~> 5.0.4"
 gem "bcrypt", "~> 3.1.7"
+gem "omniauth"
+gem "omniauth-rails_csrf_protection"
+gem "omniauth-google-oauth2"
+gem "omniauth-github"
+
 
 # Admin panel
 gem "activeadmin", "~> 3.0"
@@ -61,6 +66,7 @@ gem "tzinfo-data", platforms: %i[ windows jruby ]
 
 group :development, :test do
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
+  gem "ruby-lsp"
   gem "rspec-rails", "~> 7.0"
   gem "factory_bot_rails"
   gem "faker"
@@ -74,3 +80,6 @@ group :development do
 end
 
 gem "figaro", "~> 1.3"
+gem "fiddle"
+gem "dartsass-rails"
+gem "byebug"
