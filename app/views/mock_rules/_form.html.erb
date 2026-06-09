@@ -583,7 +583,7 @@
               </div>
             </div>
 
-            <%# ── Right column: Rate Limit box ── %>
+            <%# ── Right column: Rate Limit box ── ` %>
             <div class="mrf-rate-box">
               <div class="mrf-rate-title">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:15px;height:15px;color:#a78bfa;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
@@ -611,7 +611,7 @@
                   <%= f.select :rate_limit_type,
                         [
                           ['IP Address', 'ip'],
-                          ['API Key (X-Marcopolo-key)', 'api_key'],
+                          ['API Key', 'api_key'],
                           ['Both IP + API Key', 'both']
                         ],
                         { selected: @rule.rate_limit_type.presence || 'ip' },
@@ -621,16 +621,30 @@
                 </div>
               </div>
 
+              <%# Custom header name — visible + required only for api_key / both %>
+              <% header_required = %w[api_key both].include?(@rule.rate_limit_type) %>
+              <div class="mrf-field" id="mrf-header-field" style="display:<%= header_required ? 'block' : 'none' %>;">
+                <%= f.label :rate_limit_header, class: "mrf-label" do %>
+                  Request Header Name <span style="color:#f87171;margin-left:2px;">*</span>
+                <% end %>
+                <%= f.text_field :rate_limit_header,
+                      id: "mrf_rate_limit_header",
+                      class: "mrf-input mrf-mono",
+                      placeholder: "e.g. X-Api-Key",
+                      value: @rule.rate_limit_header.presence,
+                      oninput: "mrfUpdateHeaderHints(this.value)" %>
+                <p class="mrf-hint">The request header that must carry the API key. Missing key returns <code style="font-family:Menlo,Consolas,monospace;background:rgba(248,113,113,.1);color:#f87171;padding:1px 5px;border-radius:4px;">401</code>.</p>
+              </div>
+
               <p class="mrf-hint" id="mrf-hint-ip" style="display:<%= (@rule.rate_limit_type.blank? || @rule.rate_limit_type == 'ip') ? 'block' : 'none' %>;">
                 Tracks requests per requester IP address.
               </p>
               <p class="mrf-hint" id="mrf-hint-apikey" style="display:<%= @rule.rate_limit_type == 'api_key' ? 'block' : 'none' %>;">
-                Requires <code style="font-family:Menlo,Consolas,monospace;background:rgba(139,92,246,.15);color:#c4b5fd;padding:1px 5px;border-radius:4px;">X-Marcopolo-key</code> header. Missing key returns <code style="font-family:Menlo,Consolas,monospace;background:rgba(248,113,113,.1);color:#f87171;padding:1px 5px;border-radius:4px;">401</code>.
+                Requires <code style="font-family:Menlo,Consolas,monospace;background:rgba(139,92,246,.15);color:#c4b5fd;padding:1px 5px;border-radius:4px;"><span class="mrf-hint-header-name"><%= @rule.rate_limit_header.presence || '…' %></span></code> header. Missing key returns <code style="font-family:Menlo,Consolas,monospace;background:rgba(248,113,113,.1);color:#f87171;padding:1px 5px;border-radius:4px;">401</code>.
               </p>
               <p class="mrf-hint" id="mrf-hint-both" style="display:<%= @rule.rate_limit_type == 'both' ? 'block' : 'none' %>;">
-                Tracks per IP <em>and</em> per <code style="font-family:Menlo,Consolas,monospace;background:rgba(139,92,246,.15);color:#c4b5fd;padding:1px 5px;border-radius:4px;">X-Marcopolo-key</code>. Missing key returns <code style="font-family:Menlo,Consolas,monospace;background:rgba(248,113,113,.1);color:#f87171;padding:1px 5px;border-radius:4px;">401</code>.
+                Tracks per IP <em>and</em> per <code style="font-family:Menlo,Consolas,monospace;background:rgba(139,92,246,.15);color:#c4b5fd;padding:1px 5px;border-radius:4px;"><span class="mrf-hint-header-name"><%= @rule.rate_limit_header.presence || '…' %></span></code>. Missing key returns <code style="font-family:Menlo,Consolas,monospace;background:rgba(248,113,113,.1);color:#f87171;padding:1px 5px;border-radius:4px;">401</code>.
               </p>
-            </div>
 
           </div><%# end mrf-grid-half %>
         </div><%# end section 4 %>
@@ -686,39 +700,24 @@
     inp.value = Math.max(0, parseInt(inp.value || "0", 10) + delta);
   }
 
-  /* ── Rate limit hint toggle ── */
+  /* ── Rate limit hint + header field toggle ── */
   function mrfToggleRateLimitHint(val) {
-    document.getElementById("mrf-hint-ip").style.display     = (!val || val === "ip") ? "block" : "none";
-    document.getElementById("mrf-hint-apikey").style.display = val === "api_key"      ? "block" : "none";
-    document.getElementById("mrf-hint-both").style.display   = val === "both"         ? "block" : "none";
+    document.getElementById("mrf-hint-ip").style.display      = (!val || val === "ip") ? "block" : "none";
+    document.getElementById("mrf-hint-apikey").style.display  = val === "api_key"      ? "block" : "none";
+    document.getElementById("mrf-hint-both").style.display    = val === "both"         ? "block" : "none";
+
+    const needsHeader = val === "api_key" || val === "both";
+    const field = document.getElementById("mrf-header-field");
+    const input = document.getElementById("mrf_rate_limit_header");
+    field.style.display = needsHeader ? "block" : "none";
+    input.required = needsHeader;
+    if (!needsHeader) input.value = "";
   }
 
-  (function() {
-    const dataEl   = document.getElementById("mrf-headers-data");
-    const container = document.getElementById("mrf-header-rows");
-    if (!container) return;
-
-    let existing = {};
-    try {
-      if (dataEl) {
-        let p = JSON.parse(dataEl.textContent);
-        if (typeof p === 'string') p = JSON.parse(p);
-        if (p && typeof p === 'object' && !Array.isArray(p)) existing = p;
-      }
-    } catch(e) {}
-
-    const entries = Object.entries(existing);
-    if (entries.length === 0) mrfAddHeader();
-    else entries.forEach(([k, v]) => mrfAddHeader(k, v, true));
-    mrfSyncJSON();
-
-    const statusInp = document.getElementById("mrf_status_input");
-    if (statusInp) {
-      mrfUpdateStatusHint(statusInp.value);
-      statusInp.addEventListener("input",  e => mrfUpdateStatusHint(e.target.value));
-      statusInp.addEventListener("change", e => mrfUpdateStatusHint(e.target.value));
-    }
-  })();
+  function mrfUpdateHeaderHints(val) {
+    const name = val.trim() || "…";
+    document.querySelectorAll(".mrf-hint-header-name").forEach(el => el.textContent = name);
+  }
 
   /* ── Response headers ── */
   function mrfAddHeader(key = "", value = "", enabled = true) {

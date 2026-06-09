@@ -62,7 +62,8 @@ class IngestController < ActionController::Base
       end
 
       if @rule.rate_limit_type == "api_key" || @rule.rate_limit_type == "both"
-        api_key = request.headers["X-Marcopolo-key"]
+        header_name = @rule.rate_limit_header
+        api_key = request.headers[header_name]
         if api_key.blank?
           render json: {
             error: "Unauthorized",

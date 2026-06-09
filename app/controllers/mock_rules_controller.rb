@@ -53,7 +53,7 @@ class MockRulesController < ApplicationController
       :name, :description, :http_method, :path_pattern,
       :response_status, :response_body, :content_type,
       :delay_ms, :priority, :enabled, :use_regex,
-      :rate_limit_count, :rate_limit_period, :rate_limit_type, :ttl
+      :rate_limit_count, :rate_limit_period, :rate_limit_type, :ttl, :rate_limit_header,
     ).merge(response_headers: parsed_headers)
   end
 end
