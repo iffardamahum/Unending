@@ -12,7 +12,7 @@ gem "propshaft"
 gem "pg", "~> 1.1"
 
 # Web server
-gem "puma", ">= 5.0"
+gem "puma", ">= 8.0.2"
 
 # Frontend stack: Tailwind + Turbo + Stimulus
 gem "importmap-rails"

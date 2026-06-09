@@ -171,7 +171,7 @@
     <div class="bg-mp-card border border-mp-border rounded-[14px] p-5">
       <h3 class="text-[13px] font-semibold m-0 mb-3 text-mp-text">Quick Actions</h3>
       <div class="flex flex-col gap-2">
-        <button onclick="copyEndpointUrl()" class="text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border-none bg-mp-primary text-white shadow-[0_4px_16px_rgba(139,92,246,0.3)] hover:opacity-90 w-full justify-center">📋 Copy Endpoint</button>
+        <button onclick="copyQuickUrl()" class="text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border-none bg-mp-primary text-white shadow-[0_4px_16px_rgba(139,92,246,0.3)] hover:opacity-90 w-full justify-center">📋 Copy Endpoint</button>
         <%= link_to "+ Add Mock Rule", new_http_bin_mock_rule_path(@bin),
               class: "text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border bg-mp-green-dim text-mp-green border-mp-green-bdr hover:opacity-90 w-full justify-center" %>
 
@@ -251,7 +251,7 @@
     <%# Pro Tip ── %>
     <div class="bg-amber-500/[0.07] border border-amber-500/20 rounded-xl p-4 px-5">
       <div class="text-[12px] text-mp-yellow font-semibold mb-1">💡 Pro Tip</div>
-      <div class="text-[11px] text-amber-600/80 leading-normal">Click on any request to see full details (headers, body, response).</div>
+      <div class="text-[11px] text-amber-600/80 leading-normal">Click on any view request to see full details (headers, body, response).</div>
     </div>
 
   </div>
@@ -260,10 +260,18 @@
 <%= turbo_stream_from "bin_#{@bin.token}" %>
 
 <script>
-  function copyEndpointUrl() {
-    const url = document.getElementById("endpoint-url").textContent.trim();
-    navigator.clipboard.writeText(url).then(() => mpShowToast("URL copied!"));
-  }
+function copyEndpointUrl() {
+  const url = document.getElementById("endpoint-url").textContent.trim();
+  navigator.clipboard.writeText(url).then(() => mpShowToast("URL copied!"));
+}
+
+function copyQuickUrl() {
+  const select = document.getElementById("test-rule-select");
+  const url = (select && select.value)
+    ? select.value
+    : document.getElementById("endpoint-url").textContent.trim();
+  navigator.clipboard.writeText(url).then(() => mpShowToast("URL copied!"));
+}
 
   function copyCurl() {
     const url = document.getElementById("endpoint-url").textContent.trim();

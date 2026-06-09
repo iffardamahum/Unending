@@ -25,7 +25,8 @@ class IngestController < ActionController::Base
       response_body:   rule&.response_body,
       duration_ms:     duration,
       matched_mock:    rule.present?,
-      matched_rule:    rule
+      matched_rule:    rule,
+      mock_rule_id:    rule&.id
     )
 
     # Broadcast via Turbo Streams for real-time UI updates
@@ -62,11 +63,12 @@ class IngestController < ActionController::Base
       end
 
       if @rule.rate_limit_type == "api_key" || @rule.rate_limit_type == "both"
-        api_key = request.headers["X-Marcopolo-key"]
+        header_name = @rule.rate_limit_header
+        api_key = request.headers[header_name]
         if api_key.blank?
           render json: {
             error: "Unauthorized",
-            message: "Missing API key. This rule requires a valid API key in the X-Marcopolo-key header."
+            message: "Missing API key. This rule requires a valid API key in the [#{header_name}] header."
           }, status: 401
           return
         end

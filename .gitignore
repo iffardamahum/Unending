@@ -40,3 +40,6 @@
 # Ignore application configuration
 config/application.yml
 db/schema.rb
+
+# Ignore byebug
+.byebug_history
