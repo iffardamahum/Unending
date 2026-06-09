@@ -1,6 +1,7 @@
 class CapturedRequest < ApplicationRecord
   belongs_to :http_bin
   belongs_to :matched_rule, class_name: "MockRule", optional: true
+  belongs_to :mock_rule, optional: true
 
   HTTP_METHODS = %w[GET POST PUT PATCH DELETE HEAD OPTIONS].freeze
 
