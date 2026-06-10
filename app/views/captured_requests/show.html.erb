@@ -22,6 +22,14 @@
   else
     "Error"
   end
+
+  # Compute cURL payload for clipboard
+  headers_str = (@captured_request.headers || {})
+    .reject { |_, v| v == "[MASKED]" }
+    .map { |k, v| "  -H \"#{k}: #{v}\"" }
+    .join(" \\\n")
+  body_str = @captured_request.body.present? ? "  -d '#{@captured_request.body}'" : ""
+  curl_cmd = "curl -X #{@captured_request.http_method} \"#{request.base_url}#{@captured_request.path}\"#{headers_str.present? ? " \\\n" + headers_str : ""}#{body_str.present? ? " \\\n" + body_str : ""}"
 %>
 
 <%# ── Breadcrumb ── %>
@@ -95,7 +103,7 @@
     <%# Request Headers %>
     <div class="p-4 px-5 border-b border-mp-border last:border-b-0">
       <div class="text-[10px] text-mp-faint uppercase tracking-widest font-semibold mb-2">Request Headers</div>
-      <div class="max-h-[160px] overflow-y-auto">
+      <div class="max-h-40 overflow-y-auto">
         <% (@captured_request.headers || {}).each do |k, v| %>
           <div class="flex items-baseline gap-0 font-mono text-[12px] my-0.75">
             <span class="text-mp-primary-hi"><%= k %></span>
@@ -175,65 +183,27 @@
 <div class="bg-mp-card border border-mp-border rounded-[14px] overflow-hidden p-4 px-5">
   <div class="text-[10px] text-mp-faint uppercase tracking-widest font-semibold mb-3">Actions</div>
   <div class="flex gap-2.5 flex-wrap">
-    <button onclick="crCopyRequest()" class="text-[12px] py-2 px-4 rounded-lg cursor-pointer font-medium font-sans border-none bg-mp-primary text-white shadow-[0_4px_16px_rgba(139,92,246,0.3)] hover:opacity-90 transition-opacity">📋 Copy Request</button>
-    <button onclick="crCopyResponse()" class="text-[12px] py-2 px-4 rounded-lg cursor-pointer font-medium font-sans border bg-mp-elevated text-mp-muted-text border-mp-border-hi hover:opacity-90 transition-opacity">📋 Copy Response</button>
-    <button onclick="crCopyCurl()" class="text-[12px] py-2 px-4 rounded-lg cursor-pointer font-medium font-sans border bg-mp-green-dim text-mp-green border-mp-green-bdr hover:opacity-90 transition-opacity">🔄 Export as cURL</button>
+    <button data-controller="clipboard"
+            data-clipboard-message-value="Request copied!"
+            data-clipboard-text-value="<%= { method: @captured_request.http_method, path: @captured_request.path, headers: @captured_request.headers, query_params: @captured_request.query_params, body: @captured_request.body }.to_json %>"
+            data-action="click->clipboard#copy"
+            class="text-[12px] py-2 px-4 rounded-lg cursor-pointer font-medium font-sans border-none bg-mp-primary text-white shadow-[0_4px_16px_rgba(139,92,246,0.3)] hover:opacity-90 transition-opacity">
+      📋 Copy Request
+    </button>
+    <button data-controller="clipboard"
+            data-clipboard-message-value="Response copied!"
+            data-clipboard-text-value="<%= { status: @captured_request.response_status, headers: @captured_request.response_headers, body: @captured_request.response_body }.to_json %>"
+            data-action="click->clipboard#copy"
+            class="text-[12px] py-2 px-4 rounded-lg cursor-pointer font-medium font-sans border bg-mp-elevated text-mp-muted-text border-mp-border-hi hover:opacity-90 transition-opacity">
+      📋 Copy Response
+    </button>
+    <button data-controller="clipboard"
+            data-clipboard-message-value="cURL copied!"
+            data-clipboard-text-value="<%= curl_cmd %>"
+            data-action="click->clipboard#copy"
+            class="text-[12px] py-2 px-4 rounded-lg cursor-pointer font-medium font-sans border bg-mp-green-dim text-mp-green border-mp-green-bdr hover:opacity-90 transition-opacity">
+      🔄 Export as cURL
+    </button>
     <%= link_to "← Back to Bin", http_bin_path(@bin), class: "text-[12px] py-2 px-4 rounded-lg cursor-pointer font-medium font-sans border bg-mp-elevated text-mp-muted-text border-mp-border-hi hover:opacity-90 transition-opacity no-underline" %>
   </div>
 </div>
-
-<script>
-  const crData = <%= raw @captured_request.to_json %>;
-
-  function crCopyRequest() {
-    const payload = {
-      method: crData.http_method,
-      path: crData.path,
-      headers: crData.headers,
-      query_params: crData.query_params,
-      body: crData.body
-    };
-    navigator.clipboard.writeText(JSON.stringify(payload, null, 2))
-      .then(() => mpShowToast("Request copied!"));
-  }
-
-  function crCopyResponse() {
-    const payload = {
-      status: crData.response_status,
-      headers: crData.response_headers,
-      body: crData.response_body
-    };
-    navigator.clipboard.writeText(JSON.stringify(payload, null, 2))
-      .then(() => mpShowToast("Response copied!"));
-  }
-
-  function crCopyCurl() {
-    const baseUrl = "<%= request.base_url %>";
-    const headers = Object.entries(crData.headers || {})
-      .filter(([k, v]) => v !== "[MASKED]")
-      .map(([k, v]) => `  -H "${k}: ${v}"`)
-      .join(" \\\n");
-    const body = crData.body ? `  -d '${crData.body}'` : "";
-    const curl = `curl -X ${crData.http_method} "${baseUrl}${crData.path}" \\\n${headers}${body ? " \\\n" + body : ""}`;
-    navigator.clipboard.writeText(curl).then(() => mpShowToast("cURL copied!"));
-  }
-
-  function mpShowToast(msg) {
-    const t = document.createElement("div");
-    t.textContent = msg;
-    const isDark = document.documentElement.dataset.theme !== "light";
-    Object.assign(t.style, {
-      position: "fixed", bottom: "1.5rem", right: "1.5rem",
-      background: isDark ? "#0f0f18" : "#1a1a2e",
-      border: "1px solid " + (isDark ? "#2a2a40" : "#3a3a5a"),
-      color: "#f5f5fa", fontSize: "13px", padding: "10px 18px",
-      borderRadius: "10px", boxShadow: "0 8px 32px rgba(0,0,0,.6)",
-      zIndex: "9999", transition: "opacity .3s"
-    });
-    document.body.appendChild(t);
-    setTimeout(() => {
-      t.style.opacity = "0";
-      setTimeout(() => t.remove(), 300);
-    }, 2200);
-  }
-</script>

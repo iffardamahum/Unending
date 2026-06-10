@@ -1,302 +1,263 @@
 <% content_for :title, "#{@bin.name} – Marco Polo" %>
 
-<%# ── Breadcrumb ── %>
-<div class="text-[12px] text-mp-faint mb-3 flex items-center gap-1.5">
-  <%= link_to "Dashboard", dashboard_path, class: "text-mp-muted-text no-underline hover:underline" %>
-  <span class="opacity-40">／</span>
-  <span class="text-mp-text font-medium"><%= @bin.name %></span>
-</div>
+<div data-controller="http-bin">
+  <%# ── Breadcrumb ── %>
+  <div class="text-[12px] text-mp-faint mb-3 flex items-center gap-1.5">
+    <%= link_to "Dashboard", dashboard_path, class: "text-mp-muted-text no-underline hover:underline" %>
+    <span class="opacity-40">／</span>
+    <span class="text-mp-text font-medium"><%= @bin.name %></span>
+  </div>
 
-<%# ── Page header ── %>
-<div class="flex items-start justify-between mb-7">
-  <div class="flex items-center gap-3.5">
-    <div class="w-12 h-12 bg-mp-primary/15 border border-mp-primary/25 rounded-xl flex items-center justify-center text-[24px]">🗂️</div>
-    <div>
-      <div class="flex items-center gap-2.5">
-        <h1 class="text-[1.5rem] font-bold m-0 tracking-tight"><%= @bin.name %></h1>
-        <span class="text-[11px] bg-mp-green-dim text-mp-green border border-mp-green-bdr rounded-full px-2.5 py-0.5 font-semibold">Active</span>
+  <%# ── Page header ── %>
+  <div class="flex items-start justify-between mb-7">
+    <div class="flex items-center gap-3.5">
+      <div class="w-12 h-12 bg-mp-primary/15 border border-mp-primary/25 rounded-xl flex items-center justify-center text-[24px]">🗂️</div>
+      <div>
+        <div class="flex items-center gap-2.5">
+          <h1 class="text-[1.5rem] font-bold m-0 tracking-tight"><%= @bin.name %></h1>
+          <span class="text-[11px] bg-mp-green-dim text-mp-green border border-mp-green-bdr rounded-full px-2.5 py-0.5 font-semibold">Active</span>
+        </div>
+        <p class="text-mp-muted-text text-[12px] mt-1 mb-0"><%= @bin.description.presence || "No description." %></p>
       </div>
-      <p class="text-mp-muted-text text-[12px] mt-1 mb-0"><%= @bin.description.presence || "No description." %></p>
+    </div>
+    <div class="flex gap-2">
+      <%= link_to "✏️ Edit", edit_http_bin_path(@bin), class: "text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border bg-mp-elevated text-mp-muted-text border-mp-border-hi hover:opacity-90" %>
+      <%= button_to "🗑️ Delete", http_bin_path(@bin), method: :delete,
+            data: { turbo_confirm: "Delete this bin and all its requests?" },
+            class: "text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border bg-mp-red-dim text-mp-red border-mp-red-bdr hover:opacity-90" %>
     </div>
   </div>
-  <div class="flex gap-2">
-    <%= link_to "✏️ Edit", edit_http_bin_path(@bin), class: "text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border bg-mp-elevated text-mp-muted-text border-mp-border-hi hover:opacity-90" %>
-    <%= button_to "🗑️ Delete", http_bin_path(@bin), method: :delete,
-          data: { turbo_confirm: "Delete this bin and all its requests?" },
-          class: "text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border bg-mp-red-dim text-mp-red border-mp-red-bdr hover:opacity-90" %>
+
+  <%# ── Endpoint URL card ── %>
+  <div class="bg-mp-card border border-mp-border rounded-[14px] overflow-hidden p-5 px-6 mb-6">
+    <div class="text-[10px] text-mp-faint uppercase tracking-wider font-semibold mb-2.5">Endpoint URL</div>
+    <div class="bg-[#06060e] border border-mp-border rounded-lg p-2.5 px-4 font-mono text-[13px] text-mp-green mb-3 overflow-x-auto">
+      <span id="endpoint-url" data-http-bin-target="endpointUrl"><%= request.base_url %>/b/<%= @bin.token %></span>
+    </div>
+    <div class="flex gap-2 flex-wrap">
+      <button data-action="click->http-bin#copyEndpointUrl" class="text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border-none bg-mp-primary text-white shadow-[0_4px_16px_rgba(139,92,246,0.3)] hover:opacity-90">📋 Copy URL</button>
+      <button data-action="click->http-bin#copyCurl" class="text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border bg-mp-elevated text-mp-muted-text border-mp-border-hi hover:opacity-90">📄 Copy cURL</button>
+      <a href="<%= request.base_url %>/b/<%= @bin.token %>" target="_blank" class="text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border bg-mp-elevated text-mp-muted-text border-mp-border-hi hover:opacity-90">🌐 Test in Browser</a>
+      <% if current_user&.admin? || current_user&.master_admin? %>
+        <%= link_to "✏️ Edit in Admin", admin_http_bin_path(@bin), class: "text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border bg-mp-elevated text-mp-muted-text border-mp-border-hi hover:opacity-90" %>
+      <% end %>
+    </div>
   </div>
-</div>
 
-<%# ── Endpoint URL card ── %>
-<div class="bg-mp-card border border-mp-border rounded-[14px] overflow-hidden p-5 px-6 mb-6">
-  <div class="text-[10px] text-mp-faint uppercase tracking-wider font-semibold mb-2.5">Endpoint URL</div>
-  <div class="bg-[#06060e] border border-mp-border rounded-lg p-2.5 px-4 font-mono text-[13px] text-mp-green mb-3 overflow-x-auto">
-    <span id="endpoint-url"><%= request.base_url %>/b/<%= @bin.token %></span>
-  </div>
-  <div class="flex gap-2 flex-wrap">
-    <button onclick="copyEndpointUrl()" class="text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border-none bg-mp-primary text-white shadow-[0_4px_16px_rgba(139,92,246,0.3)] hover:opacity-90">📋 Copy URL</button>
-    <button onclick="copyCurl()" class="text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border bg-mp-elevated text-mp-muted-text border-mp-border-hi hover:opacity-90">📄 Copy cURL</button>
-    <a href="<%= request.base_url %>/b/<%= @bin.token %>" target="_blank" class="text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border bg-mp-elevated text-mp-muted-text border-mp-border-hi hover:opacity-90">🌐 Test in Browser</a>
-    <% if current_user&.admin? || current_user&.master_admin? %>
-      <%= link_to "✏️ Edit in Admin", admin_http_bin_path(@bin), class: "text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border bg-mp-elevated text-mp-muted-text border-mp-border-hi hover:opacity-90" %>
-    <% end %>
-  </div>
-</div>
+  <%# ── 2-column layout ── %>
+  <div class="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6 items-start">
 
-<%# ── 2-column layout ── %>
-<div class="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6 items-start">
+    <%# ── Left column ── %>
+    <div class="flex flex-col gap-5">
 
-  <%# ── Left column ── %>
-  <div class="flex flex-col gap-5">
+      <%# Mock Response Config ── %>
+      <% if @rules.any? %>
+        <% primary = @rules.first %>
+        <div class="bg-mp-card border border-mp-border rounded-[14px] overflow-hidden p-5 px-6">
+          <div class="flex justify-between items-center mb-3.5">
+            <span class="font-semibold text-[14px]">Mock Response Configuration</span>
+            <%= link_to "✏️ Edit in Admin", edit_admin_http_bin_path(@bin),
+                  class: "text-[11px] text-mp-primary no-underline hover:underline" %>
+          </div>
 
-    <%# Mock Response Config ── %>
-    <% if @rules.any? %>
-      <% primary = @rules.first %>
-      <div class="bg-mp-card border border-mp-border rounded-[14px] overflow-hidden p-5 px-6">
-        <div class="flex justify-between items-center mb-3.5">
-          <span class="font-semibold text-[14px]">Mock Response Configuration</span>
-          <%= link_to "✏️ Edit in Admin", edit_admin_http_bin_path(@bin),
-                class: "text-[11px] text-mp-primary no-underline hover:underline" %>
-        </div>
-
-        <div class="mb-3.5">
-          <div class="text-[10px] text-mp-faint uppercase tracking-wider mb-1.5">HTTP Status</div>
-          <span class="font-mono text-[13px] font-bold py-1 px-3 rounded-lg border <%= primary.response_status < 300 ? 'bg-mp-green-dim text-mp-green border-mp-green-bdr' : primary.response_status < 400 ? 'bg-mp-yellow-dim text-mp-yellow border-mp-yellow-bdr' : 'bg-mp-red-dim text-mp-red border-mp-red-bdr' %>">
-            <%= primary.response_status %>
-          </span>
-        </div>
-
-        <% if primary.response_body.present? %>
           <div class="mb-3.5">
-            <div class="text-[10px] text-mp-faint uppercase tracking-wider mb-1.5">Response Body</div>
-            <pre class="bg-[#06060e] border border-mp-border rounded-lg p-3 px-4 font-mono text-[12px] text-mp-green m-0 overflow-auto max-h-[200px]"><%= begin; JSON.pretty_generate(JSON.parse(primary.response_body)); rescue; primary.response_body; end %></pre>
+            <div class="text-[10px] text-mp-faint uppercase tracking-wider mb-1.5">HTTP Status</div>
+            <span class="font-mono text-[13px] font-bold py-1 px-3 rounded-lg border <%= primary.response_status < 300 ? 'bg-mp-green-dim text-mp-green border-mp-green-bdr' : primary.response_status < 400 ? 'bg-mp-yellow-dim text-mp-yellow border-mp-yellow-bdr' : 'bg-mp-red-dim text-mp-red border-mp-red-bdr' %>">
+              <%= primary.response_status %>
+            </span>
+          </div>
+
+          <% if primary.response_body.present? %>
+            <div class="mb-3.5">
+              <div class="text-[10px] text-mp-faint uppercase tracking-wider mb-1.5">Response Body</div>
+              <pre class="bg-[#06060e] border border-mp-border rounded-lg p-3 px-4 font-mono text-[12px] text-mp-green m-0 overflow-auto max-h-[200px]"><%= begin; JSON.pretty_generate(JSON.parse(primary.response_body)); rescue; primary.response_body; end %></pre>
+            </div>
+          <% end %>
+
+          <% if primary.response_headers.present? %>
+            <div>
+              <div class="text-[10px] text-mp-faint uppercase tracking-wider mb-1.5">Response Headers</div>
+              <div class="bg-mp-elevated border border-mp-border rounded-lg p-2.5 px-3.5 font-mono text-[12px]">
+                <% primary.response_headers.each do |k, v| %>
+                  <div><span class="text-[#a78bfa]"><%= k %></span><span class="text-mp-faint">: </span><span class="text-mp-muted-text"><%= v %></span></div>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+
+      <%# Captured Requests table ── %>
+      <div class="bg-mp-card border border-mp-border rounded-[14px] overflow-hidden">
+        <div class="p-4 px-6 border-b border-mp-border flex items-center justify-between">
+          <h2 class="text-[14px] font-semibold m-0 text-mp-text">Recent Requests</h2>
+          <button onclick="location.reload()"
+                  class="text-[11px] text-mp-muted-text bg-mp-elevated border border-mp-border-hi py-1 px-3 rounded-lg cursor-pointer font-sans">
+            🔄 Refresh
+          </button>
+        </div>
+        <div id="captured_requests">
+          <table class="w-full border-collapse text-[13px]">
+            <thead>
+              <tr class="bg-[#0c0c16]">
+                <th class="py-2 px-4 text-left text-mp-faint text-[10px] font-semibold uppercase tracking-wider">Method</th>
+                <th class="py-2 px-4 text-left text-mp-faint text-[10px] font-semibold uppercase tracking-wider">Path</th>
+                <th class="py-2 px-4 text-left text-mp-faint text-[10px] font-semibold uppercase tracking-wider">Status</th>
+                <th class="py-2 px-4 text-left text-mp-faint text-[10px] font-semibold uppercase tracking-wider">Matched</th>
+                <th class="py-2 px-4 text-left text-mp-faint text-[10px] font-semibold uppercase tracking-wider">Duration</th>
+                <th class="py-2 px-4 text-left text-mp-faint text-[10px] font-semibold uppercase tracking-wider">Time</th>
+                <th class="py-2 px-4 text-left text-mp-faint text-[10px] font-semibold uppercase tracking-wider"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @requests.each do |req| %>
+                <%= render "captured_requests/row", captured_request: req %>
+              <% end %>
+              <% if @requests.empty? %>
+                <tr>
+                  <td colspan="7" class="text-center py-16 px-4 text-mp-faint text-[13px]">
+                    No requests yet.<br>
+                    <code class="text-[11px] mt-2 block text-mp-muted-text font-mono">curl <%= request.base_url %>/b/<%= @bin.token %>/anything</code>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+        <%== pagy_nav(@pagy) if @pagy.pages > 1 %>
+      </div>
+    </div>
+
+    <%# ── Right sidebar ── %>
+    <div class="flex flex-col gap-4">
+
+      <%# Endpoint Info ── %>
+      <div class="bg-mp-card border border-mp-border rounded-[14px] p-5">
+        <h3 class="text-[13px] font-semibold m-0 mb-3.5 text-mp-text">Endpoint Info</h3>
+        <dl class="m-0">
+          <dt class="text-[10px] text-mp-faint uppercase tracking-wider mb-0.5">Owner</dt>
+          <dd class="text-[12px] text-violet-300 m-0 mb-3"><%= @bin.user.email %></dd>
+          <dt class="text-[10px] text-mp-faint uppercase tracking-wider mb-0.5">Created</dt>
+          <dd class="text-[12px] text-violet-300 m-0 mb-3"><%= @bin.created_at.strftime("%b %d, %H:%M") %></dd>
+          <dt class="text-[10px] text-mp-faint uppercase tracking-wider mb-0.5">Expires</dt>
+          <dd class="text-[12px] text-mp-faint m-0 mb-3">Never</dd>
+          <dt class="text-[10px] text-mp-faint uppercase tracking-wider mb-0.5">Total Requests</dt>
+          <dd class="text-[2rem] font-bold text-mp-text tracking-tight m-0 leading-tight"><%= @stats[:total] %></dd>
+        </dl>
+      </div>
+
+      <%# Quick Stats ── %>
+      <div class="bg-mp-card border border-mp-border rounded-[14px] p-5">
+        <h3 class="text-[13px] font-semibold m-0 mb-3.5 text-mp-text">Quick Stats</h3>
+        <% errors = @bin.captured_requests.where("response_status >= 400").count %>
+        <% total_f = @stats[:total].to_f %>
+        <%
+          quick_stats = [
+            { label: "Today",       value: @bin.captured_requests.where("created_at >= ?", Time.current.beginning_of_day).count },
+            { label: "Last 7 days", value: @stats[:total] },
+            { label: "Avg Response",value: "#{@bin.captured_requests.average(:duration_ms)&.round || "—"}ms" },
+            { label: "Error Rate",  value: total_f > 0 ? "#{((errors / total_f) * 100).round(1)}%" : "0%",
+              color: errors > 0 ? "text-mp-red" : "text-mp-green" },
+          ]
+        %>
+        <% quick_stats.each do |row| %>
+          <div class="flex justify-between text-[12px] mb-2.5 last:mb-0">
+            <span class="text-mp-muted-text"><%= row[:label] %></span>
+            <span class="font-semibold <%= row[:color] || 'text-mp-text' %>"><%= row[:value] %></span>
           </div>
         <% end %>
+      </div>
 
-        <% if primary.response_headers.present? %>
-          <div>
-            <div class="text-[10px] text-mp-faint uppercase tracking-wider mb-1.5">Response Headers</div>
-            <div class="bg-mp-elevated border border-mp-border rounded-lg p-2.5 px-3.5 font-mono text-[12px]">
-              <% primary.response_headers.each do |k, v| %>
-                <div><span class="text-[#a78bfa]"><%= k %></span><span class="text-mp-faint">: </span><span class="text-mp-muted-text"><%= v %></span></div>
+      <%# Quick Actions ── %>
+      <div class="bg-mp-card border border-mp-border rounded-[14px] p-5">
+        <h3 class="text-[13px] font-semibold m-0 mb-3 text-mp-text">Quick Actions</h3>
+        <div class="flex flex-col gap-2">
+          <button data-action="click->http-bin#copyQuickUrl" class="text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border-none bg-mp-primary text-white shadow-[0_4px_16px_rgba(139,92,246,0.3)] hover:opacity-90 w-full justify-center">📋 Copy Endpoint</button>
+          <%= link_to "+ Add Mock Rule", new_http_bin_mock_rule_path(@bin),
+                class: "text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border bg-mp-green-dim text-mp-green border-mp-green-bdr hover:opacity-90 w-full justify-center" %>
+
+          <% if @rules.any? %>
+            <% if @rules.length == 1 %>
+              <a href="<%= request.base_url %>/b/<%= @bin.token %>/<%= @rules.first.path_pattern.to_s.gsub(/\A\//, '') %>"
+                 target="_blank" class="text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border bg-mp-elevated text-mp-muted-text border-mp-border-hi hover:opacity-90 w-full justify-center">
+                ✅ Test Now — <%= @rules.first.path_pattern %>
+              </a>
+            <% else %>
+              <div class="relative">
+                <select id="test-rule-select"
+                        data-http-bin-target="testRuleSelect"
+                        class="w-full bg-mp-elevated border border-mp-border-hi text-mp-muted-text text-[12px] py-1.75 px-7 pl-3 rounded-lg appearance-none font-sans cursor-pointer focus:outline-none focus:border-mp-primary">
+                  <option value="">— Pick a rule to test —</option>
+                  <% @rules.each do |rule| %>
+                    <option value="<%= request.base_url %>/b/<%= @bin.token %>/<%= rule.path_pattern.to_s.gsub(/\A\//, '') %>">
+                      [<%= rule.http_method %>] <%= rule.path_pattern %> → <%= rule.response_status %>
+                    </option>
+                  <% end %>
+                </select>
+                <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-mp-muted-text pointer-events-none text-[11px]">▾</span>
+              </div>
+              <button data-action="click->http-bin#testSelectedRule" class="text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border bg-mp-elevated text-mp-muted-text border-mp-border-hi hover:opacity-90 w-full justify-center">✅ Test Selected Rule</button>
+            <% end %>
+          <% else %>
+            <button disabled class="text-[12px] py-1.5 px-3.5 rounded-lg font-medium font-sans inline-flex items-center gap-1.5 border bg-mp-elevated text-mp-faint border-mp-border w-full justify-center cursor-not-allowed opacity-60">✅ Test Now (add a rule first)</button>
+          <% end %>
+        </div>
+      </div>
+
+      <%# Mock Rules ── %>
+      <div class="bg-mp-card border border-mp-border rounded-[14px]">
+        <div class="p-4 px-6 border-b border-mp-border flex items-center justify-between">
+          <h3 class="text-[13px] font-semibold m-0 text-mp-text">Mock Rules</h3>
+          <%= link_to "+ Add", new_http_bin_mock_rule_path(@bin),
+                class: "text-[11px] text-mp-primary font-semibold no-underline hover:underline" %>
+        </div>
+        <% @rules.each do |rule| %>
+          <div class="py-2.5 px-4 border-b border-[#14141f] last:border-b-0">
+            <div class="flex items-center gap-2 mb-1.25">
+              <% method_classes = {
+                "GET" => "bg-blue-500/15 text-blue-400", "POST" => "bg-emerald-500/15 text-emerald-400",
+                "PUT" => "bg-amber-500/15 text-amber-400", "PATCH" => "bg-violet-500/15 text-violet-400",
+                "DELETE" => "bg-red-500/15 text-red-400"
+              }
+              method_cls = method_classes[rule.http_method] || "bg-violet-500/15 text-violet-400" %>
+              <span class="inline-block font-mono text-[10px] font-bold py-0.5 px-2 rounded <%= method_cls %>"><%= rule.http_method %></span>
+              <span class="font-mono text-[11px] text-mp-muted-text flex-1 overflow-hidden text-overflow-ellipsis whitespace-nowrap"><%= rule.path_pattern %></span>
+              <span class="font-mono font-bold text-[12px] <%= rule.response_status < 400 ? 'text-mp-green' : 'text-mp-red' %>"><%= rule.response_status %></span>
+            </div>
+            <div class="flex justify-between items-center mt-1">
+              <span class="text-[11px] <%= rule.enabled ? 'text-mp-muted-text' : 'text-mp-faint' %>"><%= rule.name %> <%= rule.enabled ? "✅" : "⛔" %></span>
+              <div class="flex gap-2.5 text-[11px]">
+                <%= link_to "Edit", edit_http_bin_mock_rule_path(@bin, rule), class: "text-mp-primary no-underline hover:underline" %>
+                <%= button_to "Del", http_bin_mock_rule_path(@bin, rule), method: :delete,
+                      data: { turbo_confirm: "Delete this rule?" },
+                      class: "text-mp-red bg-transparent border-none p-0 cursor-pointer text-[11px] font-sans hover:underline" %>
+              </div>
+            </div>
+            <div class="flex items-center gap-2.5 mt-1">
+              <span class="text-[10px] text-mp-faint">🕐 <%= rule.created_at.strftime("%b %d, %Y") %></span>
+              <% if rule.expires_at.present? %>
+                <% expired = rule.expires_at < Time.current %>
+                <span class="text-[10px] font-semibold <%= expired ? 'text-mp-red' : 'text-mp-yellow' %>">⏳ <%= expired ? "Expired" : "Exp" %> <%= rule.expires_at.strftime("%b %d, %Y") %></span>
+              <% else %>
+                <span class="text-[10px] text-mp-faint">⏳ No expiry</span>
               <% end %>
             </div>
           </div>
         <% end %>
-      </div>
-    <% end %>
 
-    <%# Captured Requests table ── %>
-    <div class="bg-mp-card border border-mp-border rounded-[14px] overflow-hidden">
-      <div class="p-4 px-6 border-b border-mp-border flex items-center justify-between">
-        <h2 class="text-[14px] font-semibold m-0 text-mp-text">Recent Requests</h2>
-        <button onclick="location.reload()"
-                class="text-[11px] text-mp-muted-text bg-mp-elevated border border-mp-border-hi py-1 px-3 rounded-lg cursor-pointer font-sans">
-          🔄 Refresh
-        </button>
-      </div>
-      <div id="captured_requests">
-        <table class="w-full border-collapse text-[13px]">
-          <thead>
-            <tr class="bg-[#0c0c16]">
-              <th class="py-2 px-4 text-left text-mp-faint text-[10px] font-semibold uppercase tracking-wider">Method</th>
-              <th class="py-2 px-4 text-left text-mp-faint text-[10px] font-semibold uppercase tracking-wider">Path</th>
-              <th class="py-2 px-4 text-left text-mp-faint text-[10px] font-semibold uppercase tracking-wider">Status</th>
-              <th class="py-2 px-4 text-left text-mp-faint text-[10px] font-semibold uppercase tracking-wider">Matched</th>
-              <th class="py-2 px-4 text-left text-mp-faint text-[10px] font-semibold uppercase tracking-wider">Duration</th>
-              <th class="py-2 px-4 text-left text-mp-faint text-[10px] font-semibold uppercase tracking-wider">Time</th>
-              <th class="py-2 px-4 text-left text-mp-faint text-[10px] font-semibold uppercase tracking-wider"></th>
-            </tr>
-          </thead>
-          <tbody>
-            <% @requests.each do |req| %>
-              <%= render "captured_requests/row", captured_request: req %>
-            <% end %>
-            <% if @requests.empty? %>
-              <tr>
-                <td colspan="7" class="text-center py-16 px-4 text-mp-faint text-[13px]">
-                  No requests yet.<br>
-                  <code class="text-[11px] mt-2 block text-mp-muted-text font-mono">curl <%= request.base_url %>/b/<%= @bin.token %>/anything</code>
-                </td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
-      </div>
-      <%== pagy_nav(@pagy) if @pagy.pages > 1 %>
-    </div>
-  </div>
-
-  <%# ── Right sidebar ── %>
-  <div class="flex flex-col gap-4">
-
-    <%# Endpoint Info ── %>
-    <div class="bg-mp-card border border-mp-border rounded-[14px] p-5">
-      <h3 class="text-[13px] font-semibold m-0 mb-3.5 text-mp-text">Endpoint Info</h3>
-      <dl class="m-0">
-        <dt class="text-[10px] text-mp-faint uppercase tracking-wider mb-0.5">Owner</dt>
-        <dd class="text-[12px] text-violet-300 m-0 mb-3"><%= @bin.user.email %></dd>
-        <dt class="text-[10px] text-mp-faint uppercase tracking-wider mb-0.5">Created</dt>
-        <dd class="text-[12px] text-violet-300 m-0 mb-3"><%= @bin.created_at.strftime("%b %d, %H:%M") %></dd>
-        <dt class="text-[10px] text-mp-faint uppercase tracking-wider mb-0.5">Expires</dt>
-        <dd class="text-[12px] text-mp-faint m-0 mb-3">Never</dd>
-        <dt class="text-[10px] text-mp-faint uppercase tracking-wider mb-0.5">Total Requests</dt>
-        <dd class="text-[2rem] font-bold text-mp-text tracking-tight m-0 leading-tight"><%= @stats[:total] %></dd>
-      </dl>
-    </div>
-
-    <%# Quick Stats ── %>
-    <div class="bg-mp-card border border-mp-border rounded-[14px] p-5">
-      <h3 class="text-[13px] font-semibold m-0 mb-3.5 text-mp-text">Quick Stats</h3>
-      <% errors = @bin.captured_requests.where("response_status >= 400").count %>
-      <% total_f = @stats[:total].to_f %>
-      <%
-        quick_stats = [
-          { label: "Today",       value: @bin.captured_requests.where("created_at >= ?", Time.current.beginning_of_day).count },
-          { label: "Last 7 days", value: @stats[:total] },
-          { label: "Avg Response",value: "#{@bin.captured_requests.average(:duration_ms)&.round || "—"}ms" },
-          { label: "Error Rate",  value: total_f > 0 ? "#{((errors / total_f) * 100).round(1)}%" : "0%",
-            color: errors > 0 ? "text-mp-red" : "text-mp-green" },
-        ]
-      %>
-      <% quick_stats.each do |row| %>
-        <div class="flex justify-between text-[12px] mb-2.5 last:mb-0">
-          <span class="text-mp-muted-text"><%= row[:label] %></span>
-          <span class="font-semibold <%= row[:color] || 'text-mp-text' %>"><%= row[:value] %></span>
-        </div>
-      <% end %>
-    </div>
-
-    <%# Quick Actions ── %>
-    <div class="bg-mp-card border border-mp-border rounded-[14px] p-5">
-      <h3 class="text-[13px] font-semibold m-0 mb-3 text-mp-text">Quick Actions</h3>
-      <div class="flex flex-col gap-2">
-        <button onclick="copyQuickUrl()" class="text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border-none bg-mp-primary text-white shadow-[0_4px_16px_rgba(139,92,246,0.3)] hover:opacity-90 w-full justify-center">📋 Copy Endpoint</button>
-        <%= link_to "+ Add Mock Rule", new_http_bin_mock_rule_path(@bin),
-              class: "text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border bg-mp-green-dim text-mp-green border-mp-green-bdr hover:opacity-90 w-full justify-center" %>
-
-        <% if @rules.any? %>
-          <% if @rules.length == 1 %>
-            <a href="<%= request.base_url %>/b/<%= @bin.token %>/<%= @rules.first.path_pattern.to_s.gsub(/\A\//, '') %>"
-               target="_blank" class="text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border bg-mp-elevated text-mp-muted-text border-mp-border-hi hover:opacity-90 w-full justify-center">
-              ✅ Test Now — <%= @rules.first.path_pattern %>
-            </a>
-          <% else %>
-            <div class="relative">
-              <select id="test-rule-select"
-                      class="w-full bg-mp-elevated border border-mp-border-hi text-mp-muted-text text-[12px] py-1.75 px-7 pl-3 rounded-lg appearance-none font-sans cursor-pointer focus:outline-none focus:border-mp-primary">
-                <option value="">— Pick a rule to test —</option>
-                <% @rules.each do |rule| %>
-                  <option value="<%= request.base_url %>/b/<%= @bin.token %>/<%= rule.path_pattern.to_s.gsub(/\A\//, '') %>">
-                    [<%= rule.http_method %>] <%= rule.path_pattern %> → <%= rule.response_status %>
-                  </option>
-                <% end %>
-              </select>
-              <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-mp-muted-text pointer-events-none text-[11px]">▾</span>
-            </div>
-            <button onclick="testSelectedRule()" class="text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border bg-mp-elevated text-mp-muted-text border-mp-border-hi hover:opacity-90 w-full justify-center">✅ Test Selected Rule</button>
-          <% end %>
-        <% else %>
-          <button disabled class="text-[12px] py-1.5 px-3.5 rounded-lg font-medium font-sans inline-flex items-center gap-1.5 border bg-mp-elevated text-mp-faint border-mp-border w-full justify-center cursor-not-allowed opacity-60">✅ Test Now (add a rule first)</button>
+        <% if @rules.empty? %>
+          <div class="p-8 text-center text-[12px] text-mp-faint">No rules yet.</div>
         <% end %>
       </div>
-    </div>
 
-    <%# Mock Rules ── %>
-    <div class="bg-mp-card border border-mp-border rounded-[14px]">
-      <div class="p-4 px-6 border-b border-mp-border flex items-center justify-between">
-        <h3 class="text-[13px] font-semibold m-0 text-mp-text">Mock Rules</h3>
-        <%= link_to "+ Add", new_http_bin_mock_rule_path(@bin),
-              class: "text-[11px] text-mp-primary font-semibold no-underline hover:underline" %>
+      <%# Pro Tip ── %>
+      <div class="bg-amber-500/[0.07] border border-amber-500/20 rounded-xl p-4 px-5">
+        <div class="text-[12px] text-mp-yellow font-semibold mb-1">💡 Pro Tip</div>
+        <div class="text-[11px] text-amber-600/80 leading-normal">Click on any view request to see full details (headers, body, response).</div>
       </div>
-      <% @rules.each do |rule| %>
-        <div class="py-2.5 px-4 border-b border-[#14141f] last:border-b-0">
-          <div class="flex items-center gap-2 mb-1.25">
-            <% method_classes = {
-              "GET" => "bg-blue-500/15 text-blue-400", "POST" => "bg-emerald-500/15 text-emerald-400",
-              "PUT" => "bg-amber-500/15 text-amber-400", "PATCH" => "bg-violet-500/15 text-violet-400",
-              "DELETE" => "bg-red-500/15 text-red-400"
-            }
-            method_cls = method_classes[rule.http_method] || "bg-violet-500/15 text-violet-400" %>
-            <span class="inline-block font-mono text-[10px] font-bold py-0.5 px-2 rounded <%= method_cls %>"><%= rule.http_method %></span>
-            <span class="font-mono text-[11px] text-mp-muted-text flex-1 overflow-hidden text-overflow-ellipsis whitespace-nowrap"><%= rule.path_pattern %></span>
-            <span class="font-mono font-bold text-[12px] <%= rule.response_status < 400 ? 'text-mp-green' : 'text-mp-red' %>"><%= rule.response_status %></span>
-          </div>
-          <div class="flex justify-between items-center mt-1">
-            <span class="text-[11px] <%= rule.enabled ? 'text-mp-muted-text' : 'text-mp-faint' %>"><%= rule.name %> <%= rule.enabled ? "✅" : "⛔" %></span>
-            <div class="flex gap-2.5 text-[11px]">
-              <%= link_to "Edit", edit_http_bin_mock_rule_path(@bin, rule), class: "text-mp-primary no-underline hover:underline" %>
-              <%= button_to "Del", http_bin_mock_rule_path(@bin, rule), method: :delete,
-                    data: { turbo_confirm: "Delete this rule?" },
-                    class: "text-mp-red bg-transparent border-none p-0 cursor-pointer text-[11px] font-sans hover:underline" %>
-            </div>
-          </div>
-          <div class="flex items-center gap-2.5 mt-1">
-            <span class="text-[10px] text-mp-faint">🕐 <%= rule.created_at.strftime("%b %d, %Y") %></span>
-            <% if rule.expires_at.present? %>
-              <% expired = rule.expires_at < Time.current %>
-              <span class="text-[10px] font-semibold <%= expired ? 'text-mp-red' : 'text-mp-yellow' %>">⏳ <%= expired ? "Expired" : "Exp" %> <%= rule.expires_at.strftime("%b %d, %Y") %></span>
-            <% else %>
-              <span class="text-[10px] text-mp-faint">⏳ No expiry</span>
-            <% end %>
-          </div>
-        </div>
-      <% end %>
 
-      <% if @rules.empty? %>
-        <div class="p-8 text-center text-[12px] text-mp-faint">No rules yet.</div>
-      <% end %>
     </div>
-
-    <%# Pro Tip ── %>
-    <div class="bg-amber-500/[0.07] border border-amber-500/20 rounded-xl p-4 px-5">
-      <div class="text-[12px] text-mp-yellow font-semibold mb-1">💡 Pro Tip</div>
-      <div class="text-[11px] text-amber-600/80 leading-normal">Click on any view request to see full details (headers, body, response).</div>
-    </div>
-
   </div>
+
+  <%= turbo_stream_from "bin_#{@bin.token}" %>
 </div>
-
-<%= turbo_stream_from "bin_#{@bin.token}" %>
-
-<script>
-function copyEndpointUrl() {
-  const url = document.getElementById("endpoint-url").textContent.trim();
-  navigator.clipboard.writeText(url).then(() => mpShowToast("URL copied!"));
-}
-
-function copyQuickUrl() {
-  const select = document.getElementById("test-rule-select");
-  const url = (select && select.value)
-    ? select.value
-    : document.getElementById("endpoint-url").textContent.trim();
-  navigator.clipboard.writeText(url).then(() => mpShowToast("URL copied!"));
-}
-
-  function copyCurl() {
-    const url = document.getElementById("endpoint-url").textContent.trim();
-    const curl = `curl -X POST "${url}/your-path" \\\n  -H "Content-Type: application/json" \\\n  -d '{"key": "value"}'`;
-    navigator.clipboard.writeText(curl).then(() => mpShowToast("cURL copied!"));
-  }
-
-  function testSelectedRule() {
-    const val = document.getElementById("test-rule-select")?.value;
-    if (val) window.open(val, "_blank");
-  }
-
-  function mpShowToast(msg) {
-    const t = document.createElement("div");
-    t.textContent = msg;
-    const isDark = document.documentElement.dataset.theme !== "light";
-    Object.assign(t.style, {
-      position: "fixed", bottom: "1.5rem", right: "1.5rem",
-      background: isDark ? "#0f0f18" : "#1a1a2e",
-      border: "1px solid " + (isDark ? "#2a2a40" : "#3a3a5a"),
-      color: "#f5f5fa", fontSize: "13px", padding: "10px 18px",
-      borderRadius: "10px", boxShadow: "0 8px 32px rgba(0,0,0,.6)",
-      zIndex: "9999", transition: "opacity .3s"
-    });
-    document.body.appendChild(t);
-    setTimeout(() => { t.style.opacity = "0"; setTimeout(() => t.remove(), 300); }, 2200);
-  }
-</script>
