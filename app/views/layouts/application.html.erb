@@ -29,7 +29,7 @@
         <% end %>
       </div>
 
-      <div class="flex items-center gap-[10px]">
+      <div class="flex items-center gap-">
         <button id="mp-theme-btn" class="w-8 h-8 bg-mp-elevated border border-mp-border-hi rounded-lg cursor-pointer flex items-center justify-center text-[15px] transition-colors duration-200 shrink-0 p-0 leading-none hover:bg-mp-muted" onclick="mpToggleTheme()" title="Toggle theme">
           🌙
         </button>
@@ -63,7 +63,7 @@
       <%= yield %>
     </main>
 
-    <script>
+    <script nonce="<%= request.content_security_policy_nonce %>">
       (function() {
         var t = localStorage.getItem("mp-theme") || "dark";
         document.documentElement.dataset.theme = t;

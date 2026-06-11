@@ -81,7 +81,7 @@
     <tbody>
       <% @bins.each do |bin| %>
         <% req_count = bin.captured_requests.count %>
-        <tr class="border-t border-[#14141f] hover:bg-white/[0.015] transition-colors">
+        <tr class="border-t border-[#14141f] hover:bg-white/1.5 transition-colors">
           <td class="py-3 px-5">
             <%= link_to http_bin_path(bin), class: "flex items-center gap-2 font-semibold text-violet-300 no-underline" do %>
               <span class="text-[16px]">🗂️</span>
