@@ -169,7 +169,10 @@
               </button>
             </div>
 
-            <%= f.hidden_field :response_headers, id: "mrf_response_headers_json", data: { mock_rule_form_target: "headersJsonInput" } %>
+            <%= f.hidden_field :response_headers,
+                  id: "mrf_response_headers_json",
+                  value: rule.response_headers.to_json,
+                  data: { mock_rule_form_target: "headersJsonInput" } %>
 
             <div class="mrf-header-cols">
               <div></div>

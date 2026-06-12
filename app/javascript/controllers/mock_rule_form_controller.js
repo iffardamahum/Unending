@@ -32,7 +32,7 @@ export default class extends Controller {
     if (this.hasRateLimitTypeTarget) {
       this.toggleRateLimitHint()
     }
-    
+
     // Load initial headers
     if (this.hasHeadersContainerTarget) {
       this.loadInitialHeaders()
@@ -42,19 +42,19 @@ export default class extends Controller {
   /* ── Status Code Hint ── */
   updateStatusHint() {
     if (!this.hasStatusHintTarget) return
-    
+
     const val = this.statusInputTarget.value
     const code = parseInt(val, 10)
-    
+
     if (!code || code < 100 || code > 599) {
       this.statusHintTarget.innerHTML = ""
       return
     }
-    
+
     const tier = Math.floor(code / 100)
     const color = this.STATUS_COLORS[tier] || "var(--mp-faint)"
     const label = this.STATUS_LABELS[code] || `${tier}xx`
-    
+
     this.statusHintTarget.innerHTML =
       `<span style="color:${color};font-weight:600;">${code}</span>` +
       `<span style="color:var(--mp-faint);"> – ${label}</span>`
@@ -73,7 +73,7 @@ export default class extends Controller {
   /* ── Rate Limit Hint + Toggles ── */
   toggleRateLimitHint() {
     const val = this.rateLimitTypeTarget.value
-    
+
     if (this.hasHintIpTarget) this.hintIpTarget.style.display = (!val || val === "ip") ? "block" : "none"
     if (this.hasHintApikeyTarget) this.hintApikeyTarget.style.display = val === "api_key" ? "block" : "none"
     if (this.hasHintBothTarget) this.hintBothTarget.style.display = val === "both" ? "block" : "none"
@@ -86,7 +86,7 @@ export default class extends Controller {
       this.rateLimitHeaderInputTarget.required = needsHeader
       if (!needsHeader) this.rateLimitHeaderInputTarget.value = ""
     }
-    
+
     this.updateHeaderHints()
   }
 
@@ -100,7 +100,7 @@ export default class extends Controller {
   loadInitialHeaders() {
     // Clear container
     this.headersContainerTarget.innerHTML = ""
-    
+
     const headers = this.headersValue
     if (headers && typeof headers === 'object') {
       Object.entries(headers).forEach(([key, value]) => {
@@ -108,6 +108,7 @@ export default class extends Controller {
       })
     }
     this.toggleEmptyState()
+    this.syncHeaders()
   }
 
   addHeader(event) {
@@ -133,7 +134,7 @@ export default class extends Controller {
     const row = document.createElement("div")
     row.dataset.rowId = id
     row.style.cssText = "display:grid;grid-template-columns:18px 1fr 1fr 32px;gap:8px;align-items:center;"
-    
+
     row.innerHTML = `
       <input type="checkbox" class="mrf-h-enabled" ${enabled ? "checked" : ""}
              data-action="change->mock-rule-form#syncHeaders"
@@ -154,23 +155,23 @@ export default class extends Controller {
               onmouseout="this.style.color='#55556a';this.style.background='none';">
         <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
       </button>`
-      
+
     this.headersContainerTarget.appendChild(row)
   }
 
   syncHeaders() {
     if (!this.hasHeadersContainerTarget || !this.hasHeadersJsonInputTarget) return
-    
+
     const rows = this.headersContainerTarget.querySelectorAll("[data-row-id]")
     const result = {}
-    
+
     rows.forEach(row => {
       const enabled = row.querySelector(".mrf-h-enabled").checked
       const key = row.querySelector(".mrf-h-key").value.trim()
       const value = row.querySelector(".mrf-h-value").value.trim()
       if (enabled && key) result[key] = value
     })
-    
+
     this.headersJsonInputTarget.value = JSON.stringify(result)
   }
 
@@ -188,7 +189,7 @@ export default class extends Controller {
 
   setHeaderPreset(key, value) {
     if (!this.hasHeadersContainerTarget) return
-    
+
     const rows = this.headersContainerTarget.querySelectorAll("[data-row-id]")
     for (const row of rows) {
       const kInput = row.querySelector(".mrf-h-key")
@@ -199,7 +200,7 @@ export default class extends Controller {
         return
       }
     }
-    
+
     this.addHeaderRow(key, value, true)
     this.toggleEmptyState()
     this.syncHeaders()

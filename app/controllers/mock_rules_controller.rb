@@ -44,7 +44,7 @@ class MockRulesController < ApplicationController
   def rule_params
     parsed_headers = begin
       raw = params.dig(:mock_rule, :response_headers)
-      raw.is_a?(String) ? JSON.parse(raw) : {}
+      raw.is_a?(String) && raw.present? ? JSON.parse(raw) : (raw.is_a?(Hash) ? raw : {})
     rescue JSON::ParserError
       {}
     end
