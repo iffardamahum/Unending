@@ -11,7 +11,9 @@
   <%# ── Page header ── %>
   <div class="flex items-start justify-between mb-7">
     <div class="flex items-center gap-3.5">
-      <div class="w-12 h-12 bg-mp-primary/15 border border-mp-primary/25 rounded-xl flex items-center justify-center text-[24px]">🗂️</div>
+      <div class="w-12 h-12 bg-mp-primary/15 border border-mp-primary/25 rounded-xl flex items-center justify-center">
+        <svg class="w-6 h-6 text-mp-primary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z"/></svg>
+      </div>
       <div>
         <div class="flex items-center gap-2.5">
           <h1 class="text-[1.5rem] font-bold m-0 tracking-tight"><%= @bin.name %></h1>
@@ -21,10 +23,16 @@
       </div>
     </div>
     <div class="flex gap-2">
-      <%= link_to "✏️ Edit", edit_http_bin_path(@bin), class: "text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border bg-mp-elevated text-mp-muted-text border-mp-border-hi hover:opacity-90" %>
-      <%= button_to "🗑️ Delete", http_bin_path(@bin), method: :delete,
+      <%= link_to edit_http_bin_path(@bin), class: "text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border bg-mp-elevated text-mp-muted-text border-mp-border-hi hover:opacity-90" do %>
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"/></svg>
+        Edit
+      <% end %>
+      <%= button_to http_bin_path(@bin), method: :delete,
             data: { turbo_confirm: "Delete this bin and all its requests?" },
-            class: "text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border bg-mp-red-dim text-mp-red border-mp-red-bdr hover:opacity-90" %>
+            class: "text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border bg-mp-red-dim text-mp-red border-mp-red-bdr hover:opacity-90" do %>
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
+        Delete
+      <% end %>
     </div>
   </div>
 
@@ -35,11 +43,23 @@
       <span id="endpoint-url" data-http-bin-target="endpointUrl"><%= request.base_url %>/b/<%= @bin.token %></span>
     </div>
     <div class="flex gap-2 flex-wrap">
-      <button data-action="click->http-bin#copyEndpointUrl" class="text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border-none bg-mp-primary text-white shadow-[0_4px_16px_rgba(139,92,246,0.3)] hover:opacity-90">📋 Copy URL</button>
-      <button data-action="click->http-bin#copyCurl" class="text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border bg-mp-elevated text-mp-muted-text border-mp-border-hi hover:opacity-90">📄 Copy cURL</button>
-      <a href="<%= request.base_url %>/b/<%= @bin.token %>" target="_blank" class="text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border bg-mp-elevated text-mp-muted-text border-mp-border-hi hover:opacity-90">🌐 Test in Browser</a>
+      <button data-action="click->http-bin#copyEndpointUrl" class="text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border-none bg-mp-primary text-white shadow-[0_4px_16px_rgba(139,92,246,0.3)] hover:opacity-90">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.03 0 1.9.693 2.166 1.638m-7.377 0A48.536 48.536 0 0 1 12 3c1.2 0 2.392.05 3.576.148m-7.062.007a2.25 2.25 0 0 0-1.895 2.222V19.5a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08M15.75 18H18m-2.25-4H18"/></svg>
+        Copy URL
+      </button>
+      <button data-action="click->http-bin#copyCurl" class="text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border bg-mp-elevated text-mp-muted-text border-mp-border-hi hover:opacity-90">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/></svg>
+        Copy cURL
+      </button>
+      <a href="<%= request.base_url %>/b/<%= @bin.token %>" target="_blank" class="text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border bg-mp-elevated text-mp-muted-text border-mp-border-hi hover:opacity-90">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 12 10.5c2.998 0 5.74-1.1 7.843-2.918"/></svg>
+        Test in Browser
+      </a>
       <% if current_user&.admin? || current_user&.master_admin? %>
-        <%= link_to "✏️ Edit in Admin", admin_http_bin_path(@bin), class: "text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border bg-mp-elevated text-mp-muted-text border-mp-border-hi hover:opacity-90" %>
+        <%= link_to admin_http_bin_path(@bin), class: "text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border bg-mp-elevated text-mp-muted-text border-mp-border-hi hover:opacity-90" do %>
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"/></svg>
+          Edit in Admin
+        <% end %>
       <% end %>
     </div>
   </div>
@@ -92,8 +112,9 @@
         <div class="p-4 px-6 border-b border-mp-border flex items-center justify-between">
           <h2 class="text-[14px] font-semibold m-0 text-mp-text">Recent Requests</h2>
           <button onclick="location.reload()"
-                  class="text-[11px] text-mp-muted-text bg-mp-elevated border border-mp-border-hi py-1 px-3 rounded-lg cursor-pointer font-sans">
-            🔄 Refresh
+                  class="text-[11px] text-mp-muted-text bg-mp-elevated border border-mp-border-hi py-1.5 px-3 rounded-lg cursor-pointer font-sans inline-flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5 text-mp-muted-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+            Refresh
           </button>
         </div>
         <div id="captured_requests">
@@ -172,15 +193,22 @@
       <div class="bg-mp-card border border-mp-border rounded-[14px] p-5">
         <h3 class="text-[13px] font-semibold m-0 mb-3 text-mp-text">Quick Actions</h3>
         <div class="flex flex-col gap-2">
-          <button data-action="click->http-bin#copyQuickUrl" class="text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border-none bg-mp-primary text-white shadow-[0_4px_16px_rgba(139,92,246,0.3)] hover:opacity-90 w-full justify-center">📋 Copy Endpoint</button>
-          <%= link_to "+ Add Mock Rule", new_http_bin_mock_rule_path(@bin),
-                class: "text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border bg-mp-green-dim text-mp-green border-mp-green-bdr hover:opacity-90 w-full justify-center" %>
+          <button data-action="click->http-bin#copyQuickUrl" class="text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border-none bg-mp-primary text-white shadow-[0_4px_16px_rgba(139,92,246,0.3)] hover:opacity-90 w-full justify-center">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.03 0 1.9.693 2.166 1.638m-7.377 0A48.536 48.536 0 0 1 12 3c1.2 0 2.392.05 3.576.148m-7.062.007a2.25 2.25 0 0 0-1.895 2.222V19.5a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08M15.75 18H18m-2.25-4H18"/></svg>
+            Copy Endpoint
+          </button>
+          <%= link_to new_http_bin_mock_rule_path(@bin),
+                class: "text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border bg-mp-green-dim text-mp-green border-mp-green-bdr hover:opacity-90 w-full justify-center" do %>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            Add Mock Rule
+          <% end %>
 
           <% if @rules.any? %>
             <% if @rules.length == 1 %>
               <a href="<%= request.base_url %>/b/<%= @bin.token %>/<%= @rules.first.path_pattern.to_s.gsub(/\A\//, '') %>"
                  target="_blank" class="text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border bg-mp-elevated text-mp-muted-text border-mp-border-hi hover:opacity-90 w-full justify-center">
-                ✅ Test Now — <%= @rules.first.path_pattern %>
+                <svg class="w-3.5 h-3.5 text-mp-muted-text shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
+                Test Now — <%= @rules.first.path_pattern %>
               </a>
             <% else %>
               <div class="relative">
@@ -196,10 +224,16 @@
                 </select>
                 <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-mp-muted-text pointer-events-none text-[11px]">▾</span>
               </div>
-              <button data-action="click->http-bin#testSelectedRule" class="text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border bg-mp-elevated text-mp-muted-text border-mp-border-hi hover:opacity-90 w-full justify-center">✅ Test Selected Rule</button>
+              <button data-action="click->http-bin#testSelectedRule" class="text-[12px] py-1.5 px-3.5 rounded-lg cursor-pointer font-medium font-sans no-underline inline-flex items-center gap-1.5 transition-opacity border bg-mp-elevated text-mp-muted-text border-mp-border-hi hover:opacity-90 w-full justify-center">
+                <svg class="w-3.5 h-3.5 text-mp-muted-text shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
+                Test Selected Rule
+              </button>
             <% end %>
           <% else %>
-            <button disabled class="text-[12px] py-1.5 px-3.5 rounded-lg font-medium font-sans inline-flex items-center gap-1.5 border bg-mp-elevated text-mp-faint border-mp-border w-full justify-center cursor-not-allowed opacity-60">✅ Test Now (add a rule first)</button>
+            <button disabled class="text-[12px] py-1.5 px-3.5 rounded-lg font-medium font-sans inline-flex items-center gap-1.5 border bg-mp-elevated text-mp-faint border-mp-border w-full justify-center cursor-not-allowed opacity-60">
+              <svg class="w-3.5 h-3.5 text-mp-faint shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
+              Test Now (add a rule first)
+            </button>
           <% end %>
         </div>
       </div>
@@ -225,7 +259,10 @@
               <span class="font-mono font-bold text-[12px] <%= rule.response_status < 400 ? 'text-mp-green' : 'text-mp-red' %>"><%= rule.response_status %></span>
             </div>
             <div class="flex justify-between items-center mt-1">
-              <span class="text-[11px] <%= rule.enabled ? 'text-mp-muted-text' : 'text-mp-faint' %>"><%= rule.name %> <%= rule.enabled ? "✅" : "⛔" %></span>
+              <span class="text-[11px] <%= rule.enabled ? 'text-mp-muted-text' : 'text-mp-faint' %> inline-flex items-center gap-1.5">
+                <%= rule.name %>
+                <span class="inline-block w-1.5 h-1.5 rounded-full <%= rule.enabled ? 'bg-mp-green shadow-[0_0_6px_#10b981]' : 'bg-mp-red' %>"></span>
+              </span>
               <div class="flex gap-2.5 text-[11px]">
                 <%= link_to "Edit", edit_http_bin_mock_rule_path(@bin, rule), class: "text-mp-primary no-underline hover:underline" %>
                 <%= button_to "Del", http_bin_mock_rule_path(@bin, rule), method: :delete,
@@ -233,13 +270,22 @@
                       class: "text-mp-red bg-transparent border-none p-0 cursor-pointer text-[11px] font-sans hover:underline" %>
               </div>
             </div>
-            <div class="flex items-center gap-2.5 mt-1">
-              <span class="text-[10px] text-mp-faint">🕐 <%= rule.created_at.strftime("%b %d, %Y") %></span>
+            <div class="flex items-center gap-2.5 mt-1 text-[10px] text-mp-faint">
+              <span class="inline-flex items-center gap-1">
+                <svg class="w-3 h-3 text-mp-faint" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+                <%= rule.created_at.strftime("%b %d, %Y") %>
+              </span>
               <% if rule.expires_at.present? %>
                 <% expired = rule.expires_at < Time.current %>
-                <span class="text-[10px] font-semibold <%= expired ? 'text-mp-red' : 'text-mp-yellow' %>">⏳ <%= expired ? "Expired" : "Exp" %> <%= rule.expires_at.strftime("%b %d, %Y") %></span>
+                <span class="inline-flex items-center gap-1 font-semibold <%= expired ? 'text-mp-red' : 'text-mp-yellow' %>">
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>
+                  <%= expired ? "Expired" : "Exp" %> <%= rule.expires_at.strftime("%b %d, %Y") %>
+                </span>
               <% else %>
-                <span class="text-[10px] text-mp-faint">⏳ No expiry</span>
+                <span class="inline-flex items-center gap-1">
+                  <svg class="w-3 h-3 text-mp-faint" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>
+                  No expiry
+                </span>
               <% end %>
             </div>
           </div>
@@ -252,7 +298,10 @@
 
       <%# Pro Tip ── %>
       <div class="bg-amber-500/[0.07] border border-amber-500/20 rounded-xl p-4 px-5">
-        <div class="text-[12px] text-mp-yellow font-semibold mb-1">💡 Pro Tip</div>
+        <div class="text-[12px] text-mp-yellow font-semibold mb-1.5 flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 text-mp-yellow shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18a3.75 3.75 0 0 0 .495-7.467 5.99 5.99 0 0 0-1.925 3.546 5.974 5.974 0 0 1-2.133-1A3.75 3.75 0 0 0 12 18Z"/></svg>
+          Pro Tip
+        </div>
         <div class="text-[11px] text-amber-600/80 leading-normal">Click on any view request to see full details (headers, body, response).</div>
       </div>
 

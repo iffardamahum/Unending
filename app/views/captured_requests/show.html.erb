@@ -187,22 +187,25 @@
             data-clipboard-message-value="Request copied!"
             data-clipboard-text-value="<%= { method: @captured_request.http_method, path: @captured_request.path, headers: @captured_request.headers, query_params: @captured_request.query_params, body: @captured_request.body }.to_json %>"
             data-action="click->clipboard#copy"
-            class="text-[12px] py-2 px-4 rounded-lg cursor-pointer font-medium font-sans border-none bg-mp-primary text-white shadow-[0_4px_16px_rgba(139,92,246,0.3)] hover:opacity-90 transition-opacity">
-      📋 Copy Request
+            class="text-[12px] py-2 px-4 rounded-lg cursor-pointer font-medium font-sans border-none bg-mp-primary text-white shadow-[0_4px_16px_rgba(139,92,246,0.3)] hover:opacity-90 transition-opacity inline-flex items-center gap-1.5">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.03 0 1.9.693 2.166 1.638m-7.377 0A48.536 48.536 0 0 1 12 3c1.2 0 2.392.05 3.576.148m-7.062.007a2.25 2.25 0 0 0-1.895 2.222V19.5a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08M15.75 18H18m-2.25-4H18"/></svg>
+      Copy Request
     </button>
     <button data-controller="clipboard"
             data-clipboard-message-value="Response copied!"
             data-clipboard-text-value="<%= { status: @captured_request.response_status, headers: @captured_request.response_headers, body: @captured_request.response_body }.to_json %>"
             data-action="click->clipboard#copy"
-            class="text-[12px] py-2 px-4 rounded-lg cursor-pointer font-medium font-sans border bg-mp-elevated text-mp-muted-text border-mp-border-hi hover:opacity-90 transition-opacity">
-      📋 Copy Response
+            class="text-[12px] py-2 px-4 rounded-lg cursor-pointer font-medium font-sans border bg-mp-elevated text-mp-muted-text border-mp-border-hi hover:opacity-90 transition-opacity inline-flex items-center gap-1.5">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.03 0 1.9.693 2.166 1.638m-7.377 0A48.536 48.536 0 0 1 12 3c1.2 0 2.392.05 3.576.148m-7.062.007a2.25 2.25 0 0 0-1.895 2.222V19.5a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08M15.75 18H18m-2.25-4H18"/></svg>
+      Copy Response
     </button>
     <button data-controller="clipboard"
             data-clipboard-message-value="cURL copied!"
             data-clipboard-text-value="<%= curl_cmd %>"
             data-action="click->clipboard#copy"
-            class="text-[12px] py-2 px-4 rounded-lg cursor-pointer font-medium font-sans border bg-mp-green-dim text-mp-green border-mp-green-bdr hover:opacity-90 transition-opacity">
-      🔄 Export as cURL
+            class="text-[12px] py-2 px-4 rounded-lg cursor-pointer font-medium font-sans border bg-mp-green-dim text-mp-green border-mp-green-bdr hover:opacity-90 transition-opacity inline-flex items-center gap-1.5">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h10a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25H15M9 12l3 3m0 0 3-3m-3 3V2.25"/></svg>
+      Export as cURL
     </button>
     <%= link_to "← Back to Bin", http_bin_path(@bin), class: "text-[12px] py-2 px-4 rounded-lg cursor-pointer font-medium font-sans border bg-mp-elevated text-mp-muted-text border-mp-border-hi hover:opacity-90 transition-opacity no-underline" %>
   </div>

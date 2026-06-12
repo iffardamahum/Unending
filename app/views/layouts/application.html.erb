@@ -30,8 +30,7 @@
       </div>
 
       <div class="flex items-center gap-">
-        <button id="mp-theme-btn" class="w-8 h-8 bg-mp-elevated border border-mp-border-hi rounded-lg cursor-pointer flex items-center justify-center text-[15px] transition-colors duration-200 shrink-0 p-0 leading-none hover:bg-mp-muted" onclick="mpToggleTheme()" title="Toggle theme">
-          🌙
+        <button id="mp-theme-btn" class="w-8 h-8 bg-mp-elevated border border-mp-border-hi rounded-lg cursor-pointer flex items-center justify-center text-[15px] transition-colors duration-200 shrink-0 p-0 leading-none hover:bg-mp-muted text-mp-text" onclick="mpToggleTheme()" title="Toggle theme">
         </button>
 
         <% if user_signed_in? %>
@@ -50,12 +49,18 @@
 
     <% if notice.present? %>
       <div class="max-w-[1100px] mx-auto px-6 pt-4 pb-0">
-        <div class="bg-mp-green-dim border border-mp-green-bdr text-mp-green rounded-[10px] py-2.5 px-4 text-[13px] flex items-center gap-2">✅ <%= notice %></div>
+        <div class="bg-mp-green-dim border border-mp-green-bdr text-mp-green rounded-[10px] py-2.5 px-4 text-[13px] flex items-center gap-2">
+          <svg class="w-4 h-4 text-mp-green shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
+          <%= notice %>
+        </div>
       </div>
     <% end %>
     <% if alert.present? %>
       <div class="max-w-[1100px] mx-auto px-6 pt-4 pb-0">
-        <div class="bg-mp-red-dim border border-mp-red-bdr text-mp-red rounded-[10px] py-2.5 px-4 text-[13px] flex items-center gap-2">⚠️ <%= alert %></div>
+        <div class="bg-mp-red-dim border border-mp-red-bdr text-mp-red rounded-[10px] py-2.5 px-4 text-[13px] flex items-center gap-2">
+          <svg class="w-4 h-4 text-mp-red shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/></svg>
+          <%= alert %>
+        </div>
       </div>
     <% end %>
 
@@ -65,17 +70,23 @@
 
     <script nonce="<%= request.content_security_policy_nonce %>">
       (function() {
+        var moonSvg = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z"/></svg>`;
+        var sunSvg = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m0 13.5V21m9.75-9h-2.25m-13.5 0H3m16.035-7.035-1.591 1.591M21 21l-1.591-1.591m-14.7-.291-1.591 1.591M3 3l1.591 1.591M12 7.5a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9Z"/></svg>`;
+        
         var t = localStorage.getItem("mp-theme") || "dark";
         document.documentElement.dataset.theme = t;
         var btn = document.getElementById("mp-theme-btn");
-        if (btn) btn.textContent = t === "dark" ? "🌙" : "☀️";
+        if (btn) btn.innerHTML = t === "dark" ? moonSvg : sunSvg;
       })();
 
       function mpToggleTheme() {
+        var moonSvg = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z"/></svg>`;
+        var sunSvg = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m0 13.5V21m9.75-9h-2.25m-13.5 0H3m16.035-7.035-1.591 1.591M21 21l-1.591-1.591m-14.7-.291-1.591 1.591M3 3l1.591 1.591M12 7.5a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9Z"/></svg>`;
+
         var next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
         document.documentElement.dataset.theme = next;
         localStorage.setItem("mp-theme", next);
-        document.getElementById("mp-theme-btn").textContent = next === "dark" ? "🌙" : "☀️";
+        document.getElementById("mp-theme-btn").innerHTML = next === "dark" ? moonSvg : sunSvg;
       }
     </script>
   </body>

@@ -46,8 +46,10 @@
   </div>
 
 <% else %>
-  <div class="bg-mp-card border border-dashed border-mp-border-hi rounded-2xl py-20 px-4 text-center transition-colors duration-200">
-    <div class="text-[3rem] mb-3 opacity-55">🗂️</div>
+  <div class="bg-mp-card border border-dashed border-mp-border-hi rounded-2xl py-20 px-4 text-center transition-colors duration-200 flex flex-col items-center">
+    <div class="mb-4 opacity-55">
+      <svg class="w-16 h-16 text-mp-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z"/></svg>
+    </div>
     <h3 class="text-[1.1rem] font-semibold text-mp-text mt-0 mb-2">No bins yet</h3>
     <p class="text-[13px] text-mp-muted-text mt-0 mb-6">Create a bin to start capturing HTTP requests.</p>
     <%= link_to "Create your first bin →", new_http_bin_path, class: "bg-mp-primary text-white border-none rounded-[9px] py-2.5 px-[22px] text-[13px] font-semibold cursor-pointer font-sans no-underline shadow-[0_4px_18px_rgba(139,92,246,0.35)] tracking-tight transition-all duration-150 inline-block hover:opacity-90 hover:shadow-[0_4px_24px_rgba(139,92,246,0.5)]" %>

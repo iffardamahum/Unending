@@ -20,12 +20,18 @@
   <body class="bg-mp-bg text-mp-text min-h-screen transition-colors duration-200">
     <% if notice.present? %>
       <div class="fixed top-[52px] left-0 right-0 z-50 p-4">
-        <div class="bg-mp-green-dim border border-mp-green-bdr text-mp-green rounded-[10px] py-2.5 px-4 text-[13px] flex items-center gap-2 max-w-[400px] mx-auto shadow-lg shadow-black/40">✅ <%= notice %></div>
+        <div class="bg-mp-green-dim border border-mp-green-bdr text-mp-green rounded-[10px] py-2.5 px-4 text-[13px] flex items-center gap-2 max-w-[400px] mx-auto shadow-lg shadow-black/40">
+          <svg class="w-4 h-4 text-mp-green shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
+          <%= notice %>
+        </div>
       </div>
     <% end %>
     <% if alert.present? %>
       <div class="fixed top-[52px] left-0 right-0 z-50 p-4">
-        <div class="bg-mp-red-dim border border-mp-red-bdr text-mp-red rounded-[10px] py-2.5 px-4 text-[13px] flex items-center gap-2 max-w-[400px] mx-auto shadow-lg shadow-black/40">⚠️ <%= alert %></div>
+        <div class="bg-mp-red-dim border border-mp-red-bdr text-mp-red rounded-[10px] py-2.5 px-4 text-[13px] flex items-center gap-2 max-w-[400px] mx-auto shadow-lg shadow-black/40">
+          <svg class="w-4 h-4 text-mp-red shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/></svg>
+          <%= alert %>
+        </div>
       </div>
     <% end %>
 

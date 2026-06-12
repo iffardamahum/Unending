@@ -22,7 +22,13 @@
     </span>
   </td>
   <td class="py-2.5 px-3.5 align-middle text-center">
-    <%= captured_request.matched_mock ? "✅" : "<span class='text-mp-faint'>—</span>".html_safe %>
+    <% if captured_request.matched_mock %>
+      <span class="inline-flex items-center gap-1 text-[10px] font-semibold text-mp-primary-hi bg-mp-primary-dim px-2 py-0.5 rounded-full">
+        Mock
+      </span>
+    <% else %>
+      <span class="text-mp-faint">—</span>
+    <% end %>
   </td>
   <td class="py-2.5 px-3.5 align-middle font-mono text-[11px] text-mp-faint">
     <%= "#{captured_request.duration_ms}ms" if captured_request.duration_ms %>
