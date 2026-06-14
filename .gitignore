@@ -43,3 +43,6 @@ db/schema.rb
 
 # Ignore byebug
 .byebug_history
+
+# Ignore dump
+dump.rdb
