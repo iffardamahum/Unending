@@ -40,7 +40,7 @@ gem "pundit"
 gem "redis", "~> 5.0"
 
 # Pagination & Search
-gem "pagy", "~> 9.0"
+gem "pagy", "~> 43.5"
 gem "ransack", "~> 4.1"
 
 # HTTP client (for proxying/forwarding requests)
