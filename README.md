@@ -94,18 +94,10 @@ ruby bin/rails server
 
 The app will be available at `http://localhost:3000`.
 
-### Production
 
-Run migrations and boot the server in production mode:
-```bash
-RAILS_ENV=production bin/rails db:migrate
-RAILS_ENV=production bin/rails server
-```
+## Testing
 
-
-### Testing
-
-# Run brakeman (security analysis)
+### Run brakeman (security analysis)
 ```bash
 bundle exec brakeman
 
