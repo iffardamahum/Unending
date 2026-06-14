@@ -4,7 +4,9 @@ dev_user = User.find_or_create_by!(email: "dev@example.com") do |u|
   u.password = "password123"
   u.password_confirmation = "password123"
   u.admin = true
+  u.skip_confirmation!
 end
+dev_user.save!
 puts "✓ Dev user: dev@example.com / password123"
 
 bin = dev_user.http_bins.find_or_create_by!(name: "Demo Bin") do |b|
