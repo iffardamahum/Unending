@@ -22,11 +22,11 @@ default: &default
 
 development:
   <<: *default
-  database: <%= ENV.fetch("DB_NAME", "marcopolo_development") %>
+  database: <%= ENV.fetch("DB_NAME", "unending_development") %>
 
 test:
   <<: *default
-  database: <%= ENV.fetch("DB_NAME", "marcopolo_test") %>
+  database: <%= ENV.fetch("DB_NAME", "unending_test") %>
 
 production:
   primary: &primary_production
@@ -34,13 +34,13 @@ production:
     database: <%= ENV["DB_NAME"] %>
   cache:
     <<: *primary_production
-    database: marcopolo_production_cache
+    database: unending_production_cache
     migrations_paths: db/cache_migrate
   queue:
     <<: *primary_production
-    database: marcopolo_production_queue
+    database: unending_production_queue
     migrations_paths: db/queue_migrate
   cable:
     <<: *primary_production
-    database: marcopolo_production_cable
+    database: unending_production_cable
     migrations_paths: db/cable_migrate
