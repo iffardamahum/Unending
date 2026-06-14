@@ -4,6 +4,7 @@ dev_user = User.find_or_create_by!(email: "dev@example.com") do |u|
   u.password = "password123"
   u.password_confirmation = "password123"
   u.admin = true
+  u.role = "super_admin"
   u.skip_confirmation!
 end
 dev_user.save!
