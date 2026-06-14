@@ -47,7 +47,7 @@ gem "ransack", "~> 4.1"
 gem "httpx"
 
 # Background jobs
-gem "sidekiq", "~> 7.0"
+gem "sidekiq", "~> 8.1"
 
 # Database-backed Rails solid adapters (ships with Rails 8)
 gem "solid_cache"
