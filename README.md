@@ -95,10 +95,10 @@ ruby bin/rails server
 The app will be available at `http://localhost:3000`.
 
 
-## Testing
+### Testing
 
-### Run brakeman (security analysis)
 ```bash
+# Run brakeman (security analysis)
 bundle exec brakeman
 
 # Run rubocop (style and lint checking)
